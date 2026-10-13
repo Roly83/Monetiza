@@ -1,0 +1,17 @@
+{
+  "name": "monetiza",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monetiza: calculadoras y guías para autónomos en España, gestionado en piloto automático",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "articulo": "node scripts/generar-articulo.mjs",
+    "producto": "python3 scripts/generar-producto.py"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "marked": "^14.1.4"
+  }
+}

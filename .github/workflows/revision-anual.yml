@@ -1,0 +1,27 @@
+name: Revisión fiscal anual
+
+# Cada 2 de enero abre una tarea para actualizar los datos fiscales del nuevo año.
+on:
+  schedule:
+    - cron: '0 8 2 1 *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  aviso:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ANIO=$(date +%Y)
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Actualizar datos fiscales $ANIO" \
+            --body "- [ ] Revisar tramos y cuotas de autónomos en seg-social.es
+          - [ ] Revisar escala de IRPF y mínimos en agenciatributaria.gob.es
+          - [ ] Actualizar content/datos-fiscales.json (campo anio y verificado)
+          - [ ] Actualizar anioFiscal y nombre del producto en site.config.json
+          - [ ] Regenerar el Pack Autónomo (flujo 'Generar producto') y subirlo a la tienda
+          - [ ] Añadir a content/temas.json artículos sobre las novedades del año"

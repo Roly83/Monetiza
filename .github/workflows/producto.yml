@@ -1,0 +1,22 @@
+name: Generar producto (Pack Autónomo)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  excel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install openpyxl
+      - run: python3 scripts/generar-producto.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pack-autonomo
+          path: productos/*.xlsx

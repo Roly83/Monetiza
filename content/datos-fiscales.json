@@ -1,0 +1,41 @@
+{
+  "_comentario": "Parámetros fiscales que usan las calculadoras. Revísalos cada enero (el flujo 'revision-anual' abre un aviso). Fuentes: BOE, Seguridad Social, AEAT.",
+  "anio": 2026,
+  "verificado": "Cuotas de autónomos: tabla 2025 prorrogada para 2026. Escala IRPF: estatal + autonómica media. Revisar al publicarse cambios.",
+  "iva": { "general": 21, "reducido": 10, "superreducido": 4 },
+  "retencionIrpf": { "general": 15, "nuevoAutonomo": 7 },
+  "irpf": {
+    "minimoPersonal": 5550,
+    "gastosDificilJustificacionPct": 5,
+    "gastosDificilJustificacionMax": 2000,
+    "escala": [
+      { "hasta": 12450, "tipo": 19 },
+      { "hasta": 20200, "tipo": 24 },
+      { "hasta": 35200, "tipo": 30 },
+      { "hasta": 60000, "tipo": 37 },
+      { "hasta": 300000, "tipo": 45 },
+      { "hasta": null, "tipo": 47 }
+    ]
+  },
+  "autonomos": {
+    "deduccionGenericaPct": 7,
+    "tarifaPlana": 80,
+    "tramos": [
+      { "hasta": 670, "base": 653.59, "cuota": 200 },
+      { "hasta": 900, "base": 718.95, "cuota": 220 },
+      { "hasta": 1166.7, "base": 849.67, "cuota": 260 },
+      { "hasta": 1300, "base": 950.98, "cuota": 291 },
+      { "hasta": 1500, "base": 960.78, "cuota": 294 },
+      { "hasta": 1700, "base": 960.78, "cuota": 294 },
+      { "hasta": 1850, "base": 1143.79, "cuota": 350 },
+      { "hasta": 2030, "base": 1209.15, "cuota": 370 },
+      { "hasta": 2330, "base": 1274.51, "cuota": 390 },
+      { "hasta": 2760, "base": 1356.21, "cuota": 415 },
+      { "hasta": 3190, "base": 1437.91, "cuota": 440 },
+      { "hasta": 3620, "base": 1519.61, "cuota": 465 },
+      { "hasta": 4050, "base": 1601.31, "cuota": 490 },
+      { "hasta": 6000, "base": 1732.03, "cuota": 530 },
+      { "hasta": null, "base": 1928.1, "cuota": 590 }
+    ]
+  }
+}

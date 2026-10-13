@@ -1,0 +1,257 @@
+{
+  "_comentario": "Cola de temas del piloto automático. Se publica el primero cuyo slug no exista en content/articulos. Añade temas al final cuando quieras.",
+  "temas": [
+    {
+      "slug": "modelo-303-iva-trimestral",
+      "titulo": "Modelo 303: cómo presentar el IVA trimestral paso a paso",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria,facturacion"
+    },
+    {
+      "slug": "modelo-130-pago-fraccionado",
+      "titulo": "Modelo 130: qué es, quién lo presenta y cómo se calcula",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "tarifa-plana-autonomos",
+      "titulo": "Tarifa plana de autónomos de 80 €: requisitos y cómo pedirla",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria,banco"
+    },
+    {
+      "slug": "darse-de-alta-autonomo",
+      "titulo": "Cómo darse de alta como autónomo paso a paso",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria,banco,facturacion"
+    },
+    {
+      "slug": "calendario-fiscal-autonomos",
+      "titulo": "Calendario fiscal del autónomo: todas las fechas clave del año",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "verifactu-autonomos",
+      "titulo": "Verifactu para autónomos: qué cambia y qué software necesitas",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "retencion-irpf-7-o-15",
+      "titulo": "Retención del 7 % o del 15 %: cuál aplicar en tus facturas",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "regularizacion-cuota-autonomos",
+      "titulo": "Regularización de la cuota de autónomos: qué es y cómo evitar sustos",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "cambiar-base-cotizacion",
+      "titulo": "Cómo cambiar tu base de cotización de autónomo",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "autonomo-o-sociedad-limitada",
+      "titulo": "¿Autónomo o sociedad limitada? Cuándo compensa cambiar",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "cuanto-cobrar-freelance",
+      "titulo": "Cuánto cobrar como freelance: método para fijar tus tarifas",
+      "herramienta": "calculadora-precio-hora-freelance",
+      "afiliados": "facturacion,seguro"
+    },
+    {
+      "slug": "factura-rectificativa",
+      "titulo": "Factura rectificativa: cuándo y cómo hacerla",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "facturar-clientes-extranjero",
+      "titulo": "Cómo facturar a clientes de la UE y fuera de la UE",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "facturacion,banco"
+    },
+    {
+      "slug": "roi-operador-intracomunitario",
+      "titulo": "ROI: alta en el Registro de Operadores Intracomunitarios",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "autonomo-societario",
+      "titulo": "Autónomo societario: cuota, obligaciones y diferencias",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "capitalizar-paro-autonomo",
+      "titulo": "Capitalizar el paro para hacerte autónomo: requisitos y pasos",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria,banco"
+    },
+    {
+      "slug": "baja-por-enfermedad-autonomo",
+      "titulo": "Baja por enfermedad siendo autónomo: cuánto cobras y cómo pedirla",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "seguro"
+    },
+    {
+      "slug": "cese-de-actividad-autonomos",
+      "titulo": "Paro de autónomos (cese de actividad): requisitos y cuantía",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria,seguro"
+    },
+    {
+      "slug": "deducir-gastos-casa-autonomo",
+      "titulo": "Trabajar desde casa: cómo deducir luz, internet y alquiler",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "deducir-coche-autonomo",
+      "titulo": "¿Puede un autónomo deducir el coche? IVA, IRPF y excepciones",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "dietas-autonomos",
+      "titulo": "Dietas de autónomos: límites y requisitos para deducirlas",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "amortizacion-ordenador-autonomo",
+      "titulo": "Cómo amortizar un ordenador o equipo siendo autónomo",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "renta-autonomos",
+      "titulo": "Declaración de la renta del autónomo: guía práctica",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "modelo-347-operaciones-terceros",
+      "titulo": "Modelo 347: declaración de operaciones con terceros",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "modelo-390-resumen-anual-iva",
+      "titulo": "Modelo 390: resumen anual del IVA explicado",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "modelo-111-retenciones",
+      "titulo": "Modelo 111: retenciones de trabajadores y profesionales",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "modelo-115-alquiler-local",
+      "titulo": "Modelo 115: retención por el alquiler de un local",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "iva-exento-actividades",
+      "titulo": "Actividades exentas de IVA: formación, sanidad y otras",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "recargo-equivalencia",
+      "titulo": "Recargo de equivalencia: qué es y a quién afecta",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria,facturacion"
+    },
+    {
+      "slug": "modulos-o-estimacion-directa",
+      "titulo": "Módulos o estimación directa: qué régimen elegir",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "mejor-cuenta-bancaria-autonomos",
+      "titulo": "Cómo elegir la mejor cuenta bancaria para autónomos",
+      "herramienta": null,
+      "afiliados": "banco"
+    },
+    {
+      "slug": "mejor-programa-facturacion",
+      "titulo": "Cómo elegir un programa de facturación para autónomos",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "gestoria-online-merece-la-pena",
+      "titulo": "¿Merece la pena una gestoría online? Precios y qué incluyen",
+      "herramienta": null,
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "seguro-responsabilidad-civil-autonomos",
+      "titulo": "Seguro de responsabilidad civil para autónomos: ¿lo necesitas?",
+      "herramienta": null,
+      "afiliados": "seguro"
+    },
+    {
+      "slug": "autonomo-colaborador-familiar",
+      "titulo": "Autónomo colaborador: dar de alta a un familiar",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "pluriactividad-autonomos",
+      "titulo": "Pluriactividad: trabajar por cuenta ajena y ser autónomo",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "jubilacion-autonomos",
+      "titulo": "Jubilación de autónomos: cómo se calcula tu pensión",
+      "herramienta": "calculadora-cuota-autonomos",
+      "afiliados": "seguro"
+    },
+    {
+      "slug": "ahorrar-impuestos-autonomo-legalmente",
+      "titulo": "10 formas legales de pagar menos impuestos siendo autónomo",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria,facturacion"
+    },
+    {
+      "slug": "sueldo-neto-autonomo-vs-asalariado",
+      "titulo": "Autónomo vs. asalariado: cuánto necesitas facturar para ganar lo mismo",
+      "herramienta": "calculadora-sueldo-neto-autonomo",
+      "afiliados": "gestoria"
+    },
+    {
+      "slug": "presupuesto-freelance",
+      "titulo": "Cómo hacer un presupuesto profesional como freelance",
+      "herramienta": "calculadora-precio-hora-freelance",
+      "afiliados": "facturacion"
+    },
+    {
+      "slug": "cobrar-facturas-impagadas",
+      "titulo": "Qué hacer si un cliente no paga una factura",
+      "herramienta": "calculadora-factura-autonomo",
+      "afiliados": "seguro"
+    },
+    {
+      "slug": "iva-de-caja",
+      "titulo": "Régimen especial del criterio de caja (IVA de caja)",
+      "herramienta": "calculadora-iva",
+      "afiliados": "gestoria"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+name: Piloto automático (nuevo artículo)
+
+# Publica un artículo nuevo dos veces por semana a partir de content/temas.json.
+# Variable de repositorio AUTOPUBLICAR = "true" -> se publica directamente en main.
+# En cualquier otro caso se abre una Pull Request para que la revises y la apruebes con un clic.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1,4'   # lunes y jueves, 06:17 UTC
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Slug concreto de content/temas.json (opcional)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+  id-token: write
+
+jobs:
+  articulo:
+    runs-on: ubuntu-latest
+    outputs:
+      publicado: ${{ steps.publicar.outputs.publicado }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Comprobar clave de API
+        id: clave
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::warning::Falta el secreto ANTHROPIC_API_KEY. Añádelo en Settings > Secrets and variables > Actions."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generar artículo
+        id: generar
+        if: steps.clave.outputs.ok == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/generar-articulo.mjs ${{ inputs.slug && format('--slug={0}', inputs.slug) || '' }}
+
+      - name: Comprobar que la web compila
+        if: steps.generar.outputs.slug != ''
+        run: npm test && npm run build
+
+      - name: Publicar o abrir PR
+        id: publicar
+        if: steps.generar.outputs.slug != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUTOPUBLICAR: ${{ vars.AUTOPUBLICAR }}
+          SLUG: ${{ steps.generar.outputs.slug }}
+          TITULO: ${{ steps.generar.outputs.titulo }}
+        run: |
+          git config user.name "monetiza-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ "$AUTOPUBLICAR" = "true" ]; then
+            git add content/articulos
+            git commit -m "Nuevo artículo: $TITULO"
+            git push origin HEAD:main
+            echo "publicado=true" >> "$GITHUB_OUTPUT"
+          else
+            git checkout -b "articulo/$SLUG"
+            git add content/articulos
+            git commit -m "Nuevo artículo: $TITULO"
+            git push -u origin "articulo/$SLUG"
+            gh pr create --base main --title "Nuevo artículo: $TITULO" \
+              --body "Artículo generado automáticamente. Revisa las cifras y fusiona la PR para publicarlo."
+          fi
+
+  # Los push hechos con GITHUB_TOKEN no disparan otros flujos, así que desplegamos aquí.
+  desplegar:
+    needs: articulo
+    if: needs.articulo.outputs.publicado == 'true'
+    uses: ./.github/workflows/deploy.yml

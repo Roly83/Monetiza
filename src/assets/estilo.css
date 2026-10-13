@@ -1,0 +1,72 @@
+:root {
+  --fondo: #f7f8fa;
+  --superficie: #ffffff;
+  --texto: #1d2330;
+  --suave: #5b6475;
+  --borde: #e2e5ea;
+  --marca: #0e7a5f;
+  --marca-oscura: #0a5c48;
+  --acento: #fff4d6;
+  --radio: 12px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #12151b;
+    --superficie: #1b2029;
+    --texto: #e8ebf0;
+    --suave: #a3abb9;
+    --borde: #2c3340;
+    --marca: #3cc79f;
+    --marca-oscura: #2aa883;
+    --acento: #2d2a1c;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+}
+a { color: var(--marca); }
+.contenedor { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+header.sitio { background: var(--superficie); border-bottom: 1px solid var(--borde); }
+header.sitio .contenedor { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; flex-wrap: wrap; }
+.logo { font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--texto); }
+.logo span { color: var(--marca); }
+nav a { margin-left: 16px; text-decoration: none; color: var(--suave); font-weight: 600; }
+nav a:first-child { margin-left: 0; }
+main { padding-block: 32px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.2; margin-top: 0; }
+.lead { font-size: 1.15rem; color: var(--suave); }
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; padding: 0; list-style: none; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 18px; }
+.tarjeta a { text-decoration: none; font-weight: 700; }
+.tarjeta p { margin: 6px 0 0; color: var(--suave); font-size: .95rem; }
+.calculadora { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 20px; margin-bottom: 28px; }
+@media (max-width: 680px) { .calculadora { grid-template-columns: 1fr; } }
+.calculadora form { display: grid; gap: 12px; }
+label { display: grid; gap: 4px; font-weight: 600; font-size: .95rem; }
+label.check { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+input[type=number], select { font: inherit; padding: 10px 12px; border: 1px solid var(--borde); border-radius: 8px; background: var(--fondo); color: var(--texto); width: 100%; }
+.resultado { background: var(--fondo); border-radius: 10px; padding: 16px; align-self: start; }
+.fila { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--borde); }
+.fila:last-child { border-bottom: 0; }
+.fila.destacado strong { font-size: 1.35rem; color: var(--marca); }
+.recomendaciones { display: grid; gap: 12px; margin: 32px 0; }
+.recomendacion { background: var(--acento); border-radius: var(--radio); padding: 16px 18px; }
+.recomendacion h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.recomendacion p { margin: 0 0 10px; }
+.boton { display: inline-block; background: var(--marca); color: #fff; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 700; }
+.boton:hover { background: var(--marca-oscura); }
+.aviso-afiliado { font-size: .8rem; color: var(--suave); }
+.producto { border: 2px solid var(--marca); border-radius: var(--radio); padding: 20px; margin: 32px 0; background: var(--superficie); }
+.anuncio { margin: 24px 0; min-height: 90px; }
+article img { max-width: 100%; }
+article table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+article th, article td { border: 1px solid var(--borde); padding: 8px; text-align: left; }
+.meta { color: var(--suave); font-size: .9rem; }
+.descargo { font-size: .85rem; color: var(--suave); border-top: 1px solid var(--borde); padding-top: 12px; margin-top: 32px; }
+footer { border-top: 1px solid var(--borde); padding-block: 24px; color: var(--suave); font-size: .9rem; }
+footer a { color: var(--suave); margin-right: 14px; }

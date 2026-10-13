@@ -1,0 +1,61 @@
+{
+  "nombre": "Monetiza",
+  "eslogan": "Calculadoras y guías claras para autónomos y freelancers en España",
+  "url": "https://roly83.github.io/monetiza",
+  "basePath": "/monetiza",
+  "idioma": "es-ES",
+  "autor": "Equipo Monetiza",
+  "anioFiscal": 2026,
+  "titular": {
+    "_comentario": "Datos obligatorios por la LSSI-CE para el aviso legal.",
+    "nombre": "[Nombre del titular]",
+    "nif": "[NIF]",
+    "email": "[email de contacto]"
+  },
+  "adsense": {
+    "_comentario": "Pega aquí tu ID de editor (ca-pub-XXXXXXXX) cuando Google AdSense apruebe la web. Vacío = sin anuncios.",
+    "clienteId": ""
+  },
+  "analitica": {
+    "_comentario": "Dominio registrado en plausible.io o similar. Vacío = sin analítica.",
+    "plausibleDominio": ""
+  },
+  "newsletter": {
+    "_comentario": "URL del formulario de suscripción (Brevo, MailerLite, Buttondown...). Vacío = oculto.",
+    "urlFormulario": ""
+  },
+  "producto": {
+    "_comentario": "Enlace de compra de Lemon Squeezy o Gumroad (ellos gestionan IVA y pagos). Vacío = oculto.",
+    "nombre": "Pack Autónomo 2026",
+    "precio": "19 €",
+    "descripcion": "Plantilla Excel de facturación y control de IVA/IRPF trimestral + calendario fiscal + checklist de gastos deducibles.",
+    "urlCompra": ""
+  },
+  "afiliados": {
+    "_comentario": "Sustituye cada 'url' por tu enlace de afiliado. Si la url está vacía, la recomendación no se muestra.",
+    "gestoria": {
+      "titulo": "Gestoría online para autónomos",
+      "texto": "Delega modelos 130, 303 y la renta desde unos 40-60 €/mes. Te ahorra tiempo y sanciones.",
+      "cta": "Ver gestorías recomendadas",
+      "url": ""
+    },
+    "facturacion": {
+      "titulo": "Software de facturación compatible con Verifactu",
+      "texto": "Emite facturas legales, controla gastos y prepara los trimestres en minutos.",
+      "cta": "Probar gratis",
+      "url": ""
+    },
+    "banco": {
+      "titulo": "Cuenta bancaria sin comisiones para autónomos",
+      "texto": "Separa tus finanzas personales y profesionales sin pagar mantenimiento.",
+      "cta": "Abrir cuenta",
+      "url": ""
+    },
+    "seguro": {
+      "titulo": "Seguro de responsabilidad civil profesional",
+      "texto": "Protégete ante reclamaciones de clientes desde pocos euros al mes.",
+      "cta": "Comparar seguros",
+      "url": ""
+    }
+  }
+}
