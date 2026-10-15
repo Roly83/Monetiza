@@ -8,6 +8,8 @@ export function renderSettings(view) {
   const model = h('select', {},
     [['claude-opus-5-5', 'Claude Opus 5.5 (máxima calidad)'], ['claude-sonnet-5-5', 'Claude Sonnet 5.5 (más económico)'], ['claude-haiku-5-5', 'Claude Haiku 5.5 (más rápido y barato)']]
       .map(([v, t]) => h('option', { value: v, selected: s.model === v }, t)));
+  const theme = h('select', { onchange: (e) => store.update((st) => { st.settings.theme = e.target.value; }) },
+    [['dark', '🌙 Oscuro'], ['light', '☀️ Claro'], ['auto', '🌗 Automático (según el sistema)']].map(([v, t]) => h('option', { value: v, selected: (s.theme || 'dark') === v }, t)));
   const rate = h('input', { type: 'range', min: 0.6, max: 1.2, step: 0.05, value: s.rateEn });
   const voiceSel = (prefix, current) => h('select', {}, h('option', { value: '' }, 'Automática'),
     listVoices(prefix).map((v) => h('option', { value: v.name, selected: v.name === current }, `${v.name} (${v.lang})`)));
@@ -26,6 +28,8 @@ export function renderSettings(view) {
   mount(view, 
     h('h1', {}, '⚙️ Ajustes'),
     h('div', { class: 'form' },
+      h('h2', {}, 'Apariencia'),
+      h('label', {}, 'Tema', theme),
       h('h2', {}, 'Inteligencia artificial'),
       h('p', { class: 'muted' }, 'El traductor libre, el intérprete, el examen conversacional y los guiones personalizados usan Claude. Crea una clave en console.anthropic.com (pago por uso, céntimos por sesión). La clave se guarda solo en este dispositivo.'),
       h('label', {}, 'Clave de API', key),

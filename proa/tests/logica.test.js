@@ -81,3 +81,10 @@ test('temario: 8 unidades con frases y traducciones completas', () => {
     for (const p of u.phrases) assert.ok(p.en && p.es, `${u.id}: ${p.en}`);
   }
 });
+
+test('audio de la sesión: cada frase empieza tras la anterior y su pausa', async () => {
+  const { timeline } = await import('../js/features/hypnosis-render.js');
+  const { starts, total } = timeline([2, 3], [1000, 500]);
+  assert.deepEqual(starts, [6, 9]);
+  assert.equal(total, 6 + 2 + 1 + 3 + 0.5 + 10);
+});

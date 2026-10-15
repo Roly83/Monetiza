@@ -9,11 +9,15 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    try { document.documentElement.dataset.theme = JSON.parse(localStorage.getItem('proa:v1') || '{}').settings?.theme || 'dark'; }
+    catch { document.documentElement.dataset.theme = 'dark'; }
+  </script>
 </head>
 <body>
   <header class="topbar">
     <div class="brand">⚓ <strong>Proa</strong> <span>Inglés Marítimo</span></div>
-    <span id="ai-status" class="pill"></span>
+    <div class="topbar-right"><span id="ai-status" class="pill"></span><button id="theme-btn" class="theme-btn" type="button"></button></div>
   </header>
   <nav class="tabs" id="tabs" aria-label="Secciones"></nav>
   <main id="view" tabindex="-1"></main>

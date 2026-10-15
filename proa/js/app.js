@@ -1,5 +1,6 @@
 import { h } from './core/ui.js';
 import { hasAI } from './core/ai.js';
+import { store } from './core/store.js';
 import { renderHome } from './features/home.js';
 import { renderCourse } from './features/course.js';
 import { renderHypnosis } from './features/hypnosis.js';
@@ -38,6 +39,24 @@ function updateStatus() {
   el.textContent = hasAI() ? 'IA conectada' : 'Modo sin conexión';
   el.className = `pill ${hasAI() ? 'ok' : 'off'}`;
 }
+
+// Tema: oscuro (por defecto), claro o automático según el sistema.
+const THEMES = { dark: ['🌙', 'Modo oscuro'], light: ['☀️', 'Modo claro'], auto: ['🌗', 'Tema automático'] };
+export function applyTheme() {
+  const t = store.get().settings.theme || 'dark';
+  document.documentElement.dataset.theme = t;
+  const btn = document.getElementById('theme-btn');
+  btn.textContent = THEMES[t][0];
+  btn.title = `${THEMES[t][1]} (pulsa para cambiar)`;
+  btn.setAttribute('aria-label', btn.title);
+  document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#0b2239';
+}
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const order = ['dark', 'light', 'auto'];
+  store.update((s) => { s.settings.theme = order[(order.indexOf(s.settings.theme) + 1) % order.length]; });
+});
+window.addEventListener('proa:store', applyTheme);
+applyTheme();
 
 document.getElementById('tabs').append(
   ...ROUTES.map((r) => h('a', { href: `#/${r.id}`, 'data-id': r.id }, h('span', { 'aria-hidden': 'true' }, r.icon), r.label)),

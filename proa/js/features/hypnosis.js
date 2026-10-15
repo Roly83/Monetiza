@@ -5,6 +5,8 @@ import { UNITS, unitById } from '../data/curriculum.js';
 import { generateScript, estimateSeconds } from './hypnosis-script.js';
 import { BinauralEngine, PRESETS } from '../audio/binaural.js';
 import { speak, stopSpeaking, wait, LANGS, support } from '../audio/speech.js';
+import { VOICES, voiceById, isVoiceDownloaded } from '../audio/neural-tts.js';
+import { files } from '../core/idb.js';
 
 const engine = new BinauralEngine();
 let player = null; // { stop() }
@@ -51,6 +53,7 @@ function renderLibrary(view) {
             h('button', { class: 'btn ghost', onclick: () => {
               if (!confirm(`¿Borrar "${s.title}"?`)) return;
               store.update((st) => { st.sessions = st.sessions.filter((x) => x.id !== s.id); });
+              files.del(s.id);
               view.replaceChildren(); renderLibrary(view);
             } }, 'Borrar'),
           ),
@@ -118,15 +121,146 @@ function renderCreate(view, preUnit) {
 function renderPlayer(view, id) {
   const session = store.get().sessions.find((s) => s.id === id);
   if (!session) { location.hash = '#/hipnosis'; return; }
+  const cleanups = [];
+  const metaText = () => {
+    const x = store.get().sessions.find((y) => y.id === id) ?? session;
+    return `${fmtTime(x.audioSeconds ?? x.seconds)} por vuelta · ${PRESETS[x.preset]?.label} · escuchada ${x.plays} ${x.plays === 1 ? 'vez' : 'veces'}`;
+  };
+  const meta = h('p', { class: 'muted' }, metaText());
 
+  mount(view,
+    h('a', { href: '#/hipnosis', class: 'back' }, '← Biblioteca'),
+    h('h1', {}, session.title),
+    meta,
+    audioSection(session, cleanups, () => { meta.textContent = metaText(); }),
+    liveSection(session, cleanups),
+    h('p', { class: 'muted small' }, '🎧 Usa auriculares: el efecto binaural necesita un tono distinto en cada oído.'),
+  );
+  return () => cleanups.forEach((f) => f());
+}
+
+const REPEAT_OPTIONS = [['1', 'Una vez'], ['2', '2 veces seguidas'], ['3', '3 veces seguidas'], ['loop', 'En bucle hasta que la pare']];
+
+// Modo archivo de audio: suena con la pantalla apagada y se controla desde la pantalla de bloqueo.
+function audioSection(session, cleanups, onChange = () => {}) {
+  const box = h('section', { class: 'player' }, h('h2', {}, '🌙 Escuchar con la pantalla apagada'));
+  const s = store.get().settings;
+
+  const showAudio = (blob) => {
+    const url = URL.createObjectURL(blob);
+    cleanups.push(() => { audio.pause(); URL.revokeObjectURL(url); });
+    const audio = h('audio', { controls: true, src: url, preload: 'metadata', class: 'audio' });
+    const repeatSel = h('select', {}, REPEAT_OPTIONS.map(([v, t]) => h('option', { value: v }, t)));
+    const info = h('p', { class: 'now-playing', 'aria-live': 'polite' }, 'Pulsa ▶, bloquea el móvil y relájate.');
+    let remaining = 1;
+    const applyRepeat = () => {
+      audio.loop = repeatSel.value === 'loop';
+      remaining = audio.loop ? Infinity : Number(repeatSel.value);
+    };
+    repeatSel.addEventListener('change', applyRepeat);
+    applyRepeat();
+    audio.addEventListener('play', () => {
+      setMediaSession(session, audio);
+      info.textContent = '▶ Reproduciendo. Puedes apagar la pantalla.';
+    });
+    audio.addEventListener('ended', () => {
+      store.update((st) => { const x = st.sessions.find((y) => y.id === session.id); if (x) x.plays++; });
+      onChange();
+      remaining--;
+      if (remaining > 0) { audio.currentTime = 0; audio.play(); }
+      else { info.textContent = '✅ Sesión completada. Puedes repetirla cuando quieras.'; applyRepeat(); }
+    });
+    box.append(
+      h('div', { class: 'orb', 'aria-hidden': 'true' }),
+      info, audio,
+      h('label', {}, 'Repetición', repeatSel),
+      h('div', { class: 'row' },
+        h('a', { class: 'btn ghost', href: url, download: `${session.title.replace(/[^\wáéíóúñ ]+/gi, '').trim()}.mp3` }, '⬇ Descargar MP3'),
+        h('button', { class: 'btn ghost', onclick: async () => {
+          await files.del(session.id);
+          location.reload();
+        } }, '↻ Volver a generar'),
+      ),
+      h('p', { class: 'muted small' }, 'El audio está guardado en este dispositivo y funciona sin conexión. También puedes descargarlo y escucharlo en cualquier reproductor.'),
+    );
+  };
+
+  const prepare = () => {
+    const esSel = h('select', {}, VOICES.es.map((v) => h('option', { value: v.id, selected: v.id === s.neuralEs }, v.label)));
+    const enSel = h('select', {}, VOICES.en.map((v) => h('option', { value: v.id, selected: v.id === s.neuralEn }, v.label)));
+    const sizeNote = h('p', { class: 'muted small' });
+    const updateNote = async () => {
+      const pending = [];
+      for (const sel of [esSel, enSel]) if (!(await isVoiceDownloaded(sel.value))) pending.push(voiceById(sel.value));
+      sizeNote.textContent = pending.length
+        ? `La primera vez se descargan las voces (${pending.reduce((t, v) => t + v.mb, 0)} MB en total). Mejor con wifi; después quedan guardadas.`
+        : 'Voces ya descargadas en este dispositivo.';
+    };
+    esSel.addEventListener('change', updateNote);
+    enSel.addEventListener('change', updateNote);
+    updateNote();
+    const bar = h('progress', { class: 'hidden', max: 1, value: 0 });
+    const msg = h('p', { class: 'now-playing', 'aria-live': 'polite' });
+    const go = h('button', { class: 'btn primary big' }, '🎙️ Preparar audio');
+    go.addEventListener('click', async () => {
+      go.disabled = true;
+      esSel.disabled = enSel.disabled = true;
+      bar.classList.remove('hidden');
+      store.update((st) => { st.settings.neuralEs = esSel.value; st.settings.neuralEn = enSel.value; });
+      try {
+        const { renderSession } = await import('./hypnosis-render.js');
+        const { blob, seconds } = await renderSession(session, { es: esSel.value, en: enSel.value }, (phase, f, detail) => {
+          bar.value = f;
+          msg.textContent = detail;
+        });
+        await files.put(session.id, blob);
+        store.update((st) => { const x = st.sessions.find((y) => y.id === session.id); if (x) x.audioSeconds = seconds; });
+        form.remove();
+        showAudio(blob);
+        onChange();
+        toast('Audio listo y guardado en el dispositivo.');
+      } catch (e) {
+        msg.textContent = `No se pudo preparar el audio: ${e.message}`;
+        go.disabled = false;
+        esSel.disabled = enSel.disabled = false;
+      }
+    });
+    const form = h('div', { class: 'prepare' },
+      h('p', {}, 'Genera la sesión como archivo de audio con voces naturales. Así sigue sonando con la pantalla apagada, en segundo plano y desde los controles de la pantalla de bloqueo.'),
+      h('label', {}, 'Voz en español', esSel),
+      h('label', {}, 'Voz en inglés', enSel),
+      sizeNote, go, bar, msg,
+    );
+    box.append(form);
+  };
+
+  files.get(session.id).then((blob) => (blob ? showAudio(blob) : prepare()));
+  return box;
+}
+
+function setMediaSession(session, audio) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: session.title,
+    artist: 'Proa · Inglés Marítimo',
+    album: 'Autohipnosis',
+    artwork: [{ src: new URL('icon.svg', location.href).href, sizes: '512x512', type: 'image/svg+xml' }],
+  });
+  navigator.mediaSession.setActionHandler('play', () => audio.play());
+  navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+  navigator.mediaSession.setActionHandler('stop', () => { audio.pause(); audio.currentTime = 0; });
+  navigator.mediaSession.setActionHandler('seekbackward', () => { audio.currentTime = Math.max(0, audio.currentTime - 15); });
+  navigator.mediaSession.setActionHandler('seekforward', () => { audio.currentTime += 15; });
+}
+
+// Modo en vivo: voz del navegador al momento (necesita la pantalla encendida).
+function liveSection(session, cleanups) {
   const status = h('p', { class: 'now-playing', 'aria-live': 'polite' }, 'Pulsa "Comenzar" con los auriculares puestos.');
   const progress = h('progress', { max: session.segments.length, value: 0 });
-  const repeatSel = h('select', {},
-    [['1', 'Una vez'], ['2', '2 veces seguidas'], ['3', '3 veces seguidas'], ['loop', 'En bucle hasta que la pare']]
-      .map(([v, t]) => h('option', { value: v }, t)));
+  const repeatSel = h('select', {}, REPEAT_OPTIONS.map(([v, t]) => h('option', { value: v }, t)));
   const volume = h('input', { type: 'range', min: 0, max: 0.8, step: 0.05, value: 0.35 });
   volume.addEventListener('input', () => engine.setVolume(Number(volume.value)));
-  const start = h('button', { class: 'btn primary big' }, '▶ Comenzar');
+  const start = h('button', { class: 'btn primary' }, '▶ Comenzar');
   const stop = h('button', { class: 'btn', disabled: true }, '⏹ Detener');
   const showText = h('input', { type: 'checkbox' });
   const textBox = h('div', { class: 'script-text hidden' });
@@ -146,14 +280,12 @@ function renderPlayer(view, id) {
   });
   stop.addEventListener('click', () => player?.stop());
   showText.addEventListener('change', () => textBox.classList.toggle('hidden', !showText.checked));
+  cleanups.push(() => player?.stop());
 
-  mount(view, 
-    h('a', { href: '#/hipnosis', class: 'back' }, '← Biblioteca'),
-    h('h1', {}, session.title),
-    h('p', { class: 'muted' }, `${fmtTime(session.seconds)} por vuelta · ${PRESETS[session.preset]?.label} · escuchada ${session.plays} veces`),
-    support.tts ? null : h('div', { class: 'warning' }, 'Tu navegador no tiene síntesis de voz: solo sonará el fondo binaural.'),
+  return h('details', { class: 'live' },
+    h('summary', {}, '☀️ Modo en vivo (con la pantalla encendida, voz del navegador)'),
     h('div', { class: 'player' },
-      h('div', { class: 'orb', 'aria-hidden': 'true' }),
+      support.tts ? null : h('div', { class: 'warning' }, 'Tu navegador no tiene síntesis de voz: solo sonará el fondo binaural.'),
       status, progress,
       h('div', { class: 'row' }, start, stop),
       h('label', {}, 'Repetición', repeatSel),
@@ -161,9 +293,7 @@ function renderPlayer(view, id) {
       h('label', { class: 'check' }, showText, 'Mostrar el texto mientras escucho'),
       textBox,
     ),
-    h('p', { class: 'muted small' }, '🎧 Usa auriculares: el efecto binaural necesita un tono distinto en cada oído.'),
   );
-  return () => player?.stop();
 }
 
 async function play(session, { repeat, volume, status, progress, textBox }) {

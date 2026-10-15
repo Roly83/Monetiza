@@ -9,6 +9,9 @@ const defaults = () => ({
     voiceEn: '',
     voiceEs: '',
     hypnosisAccepted: false,
+    neuralEs: 'es_ES-davefx-medium',
+    neuralEn: 'en_GB-alan-medium',
+    theme: 'dark',
   },
   studied: {}, // unitId -> { seen: n, completedAt }
   cards: {}, // phraseId -> tarjeta de repetición espaciada

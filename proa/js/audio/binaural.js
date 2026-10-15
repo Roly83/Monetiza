@@ -36,6 +36,63 @@ function pinkNoiseBuffer(ctx, seconds = 4) {
   return buffer;
 }
 
+// Construye el fondo (tonos binaurales + oleaje) sobre cualquier contexto de audio:
+// en vivo (AudioContext) o renderizado a archivo (OfflineAudioContext).
+// duration: si se indica, programa la bajada final de volumen.
+export function buildBed(ctx, destination, { preset = 'theta', volume = 0.35, ocean = true, rampSeconds = 300, duration } = {}) {
+  const p = PRESETS[preset] ?? PRESETS.theta;
+  const now = ctx.currentTime;
+  const nodes = [];
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0, now);
+  master.gain.linearRampToValueAtTime(volume, now + 8); // entrada suave
+  if (duration) {
+    master.gain.setValueAtTime(volume, Math.max(now + 8, duration - 8));
+    master.gain.linearRampToValueAtTime(0, duration);
+  }
+  master.connect(destination);
+
+  const merger = ctx.createChannelMerger(2);
+  const toneGain = ctx.createGain();
+  toneGain.gain.value = 0.25;
+  merger.connect(toneGain).connect(master);
+
+  const { left, right } = earFrequencies(p.carrier, p.beat);
+  const oscL = ctx.createOscillator();
+  const oscR = ctx.createOscillator();
+  oscL.frequency.setValueAtTime(left, now);
+  oscR.frequency.setValueAtTime(right, now);
+  if (p.toBeat) {
+    const end = earFrequencies(p.carrier, p.toBeat);
+    oscL.frequency.linearRampToValueAtTime(end.left, now + rampSeconds);
+    oscR.frequency.linearRampToValueAtTime(end.right, now + rampSeconds);
+  }
+  oscL.connect(merger, 0, 0);
+  oscR.connect(merger, 0, 1);
+  nodes.push(oscL, oscR);
+
+  if (ocean) {
+    const noise = ctx.createBufferSource();
+    noise.buffer = pinkNoiseBuffer(ctx);
+    noise.loop = true;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 900;
+    const waveGain = ctx.createGain();
+    waveGain.gain.value = 0.35;
+    // Oleaje: modulación lenta del volumen (una ola cada ~9 s).
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.11;
+    const lfoDepth = ctx.createGain();
+    lfoDepth.gain.value = 0.25;
+    lfo.connect(lfoDepth).connect(waveGain.gain);
+    noise.connect(lp).connect(waveGain).connect(master);
+    nodes.push(noise, lfo);
+  }
+  nodes.forEach((n) => n.start(now));
+  return { master, nodes };
+}
+
 export class BinauralEngine {
   constructor() {
     this.ctx = null;
@@ -44,62 +101,15 @@ export class BinauralEngine {
     this.running = false;
   }
 
-  async start({ preset = 'theta', volume = 0.35, ocean = true, rampSeconds = 300 } = {}) {
+  async start(options = {}) {
     if (this.running) this.stop(0);
     const Ctx = globalThis.AudioContext || globalThis.webkitAudioContext;
     if (!Ctx) throw new Error('Este navegador no soporta Web Audio.');
     this.ctx = this.ctx ?? new Ctx();
     await this.ctx.resume();
-    const ctx = this.ctx;
-    const p = PRESETS[preset] ?? PRESETS.theta;
-    const now = ctx.currentTime;
-
-    this.master = ctx.createGain();
-    this.master.gain.setValueAtTime(0, now);
-    this.master.gain.linearRampToValueAtTime(volume, now + 8); // entrada suave
-    this.master.connect(ctx.destination);
-
-    const merger = ctx.createChannelMerger(2);
-    const toneGain = ctx.createGain();
-    toneGain.gain.value = 0.25;
-    merger.connect(toneGain).connect(this.master);
-
-    const { left, right } = earFrequencies(p.carrier, p.beat);
-    const oscL = ctx.createOscillator();
-    const oscR = ctx.createOscillator();
-    oscL.frequency.setValueAtTime(left, now);
-    oscR.frequency.setValueAtTime(right, now);
-    if (p.toBeat) {
-      const end = earFrequencies(p.carrier, p.toBeat);
-      oscL.frequency.linearRampToValueAtTime(end.left, now + rampSeconds);
-      oscR.frequency.linearRampToValueAtTime(end.right, now + rampSeconds);
-    }
-    oscL.connect(merger, 0, 0);
-    oscR.connect(merger, 0, 1);
-    oscL.start();
-    oscR.start();
-    this.nodes.push(oscL, oscR);
-
-    if (ocean) {
-      const noise = ctx.createBufferSource();
-      noise.buffer = pinkNoiseBuffer(ctx);
-      noise.loop = true;
-      const lp = ctx.createBiquadFilter();
-      lp.type = 'lowpass';
-      lp.frequency.value = 900;
-      const waveGain = ctx.createGain();
-      waveGain.gain.value = 0.35;
-      // Oleaje: modulación lenta del volumen (una ola cada ~9 s).
-      const lfo = ctx.createOscillator();
-      lfo.frequency.value = 0.11;
-      const lfoDepth = ctx.createGain();
-      lfoDepth.gain.value = 0.25;
-      lfo.connect(lfoDepth).connect(waveGain.gain);
-      noise.connect(lp).connect(waveGain).connect(this.master);
-      noise.start();
-      lfo.start();
-      this.nodes.push(noise, lfo);
-    }
+    const { master, nodes } = buildBed(this.ctx, this.ctx.destination, options);
+    this.master = master;
+    this.nodes = nodes;
     this.running = true;
   }
 
@@ -119,7 +129,4 @@ export class BinauralEngine {
     setTimeout(() => nodes.forEach((n) => { try { n.stop(); } catch {} }), fadeSeconds * 1000 + 100);
     this.running = false;
   }
-
-  suspend() { return this.ctx?.suspend(); }
-  resume() { return this.ctx?.resume(); }
 }
