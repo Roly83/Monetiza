@@ -4,9 +4,9 @@ name: Piloto automático (nuevo artículo)
 # Variable de repositorio AUTOPUBLICAR = "true" -> se publica directamente en main.
 # En cualquier otro caso se abre una Pull Request para que la revises y la apruebes con un clic.
 
+# Programación desactivada: el proyecto de la web de calculadoras está en pausa.
+# Para reactivarla, vuelve a añadir:  schedule: [{cron: '17 6 * * 1,4'}]
 on:
-  schedule:
-    - cron: '17 6 * * 1,4'   # lunes y jueves, 06:17 UTC
   workflow_dispatch:
     inputs:
       slug:

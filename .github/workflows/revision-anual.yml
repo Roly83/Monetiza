@@ -1,9 +1,8 @@
 name: Revisión fiscal anual
 
 # Cada 2 de enero abre una tarea para actualizar los datos fiscales del nuevo año.
+# Programación desactivada mientras el proyecto está en pausa.
 on:
-  schedule:
-    - cron: '0 8 2 1 *'
   workflow_dispatch:
 
 permissions:
