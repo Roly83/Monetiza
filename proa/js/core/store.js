@@ -12,6 +12,10 @@ const defaults = () => ({
     neuralEs: 'es_ES-davefx-medium',
     neuralEn: 'en_GB-alan-medium',
     theme: 'dark',
+    voiceEngine: 'kokoro',
+    kokoroEn: 'bm_george',
+    kokoroEs: 'em_alex',
+    naturalReady: {},
   },
   studied: {}, // unitId -> { seen: n, completedAt }
   cards: {}, // phraseId -> tarjeta de repetición espaciada

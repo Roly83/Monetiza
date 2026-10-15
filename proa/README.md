@@ -28,12 +28,19 @@ Oscuro por defecto. Se cambia con el botón 🌙/☀️ de la barra superior o e
 
 - HTML, CSS y JavaScript sin dependencias ni compilación; funciona sin conexión gracias a un *service worker*.
 - **Audio binaural**: Web Audio API (un oscilador por oído y ruido rosa con oleaje).
-- **Voz**: síntesis y reconocimiento del navegador (gratis).
-- **Audio para pantalla apagada**: voces neuronales [Piper](https://github.com/rhasspy/piper) ejecutadas en el
-  navegador (onnxruntime-web + espeak-ng en WebAssembly). Las voces (~63 MB cada una) se descargan una vez desde
-  Hugging Face y quedan en caché. La mezcla con el fondo binaural se hace con `OfflineAudioContext` y se codifica
+- **Voz natural (Kokoro-82M, Apache-2.0)** en tres niveles:
+  1. **Audios pre-generados** (`models/clips/`, ~720 MP3) para todo el texto fijo: frases del curso, guiones de
+     hipnosis y examen guiado, con 2 voces inglesas (George, Emma) y 2 españolas (Alex, Dora). Suenan al instante
+     y sin descargas. Se regeneran con `tools/textos-voz.mjs` + `tools/bake_voices.py`.
+  2. **Modelo en el navegador** (`models/kokoro/`, 93 MB, int8) para texto nuevo (traductor, intérprete, examen
+     con IA, guiones con IA): se descarga una vez desde Ajustes. Fonemas con espeak-ng en WebAssembly
+     (piper-phonemize) e inferencia con onnxruntime-web; `sw.js` activa el aislamiento entre orígenes para usar
+     varios hilos.
+  3. **Voz del navegador** como respaldo.
+  También está disponible **Piper** (voces de Hugging Face) como motor más rápido y ligero.
+- **Reconocimiento de voz**: el del navegador (Chrome/Edge).
+- **Audio para pantalla apagada**: la sesión se mezcla con el fondo binaural (`OfflineAudioContext`) y se codifica
   a MP3 con [lamejs](https://github.com/zhuker/lamejs) (LGPL-3.0, en `vendor/`). El audio se guarda en IndexedDB.
-  Una sesión de 15 minutos tarda unos 3 minutos en generarse en un ordenador sin tarjeta gráfica y ocupa ~11 MB.
 - **IA**: Claude (`claude-opus-5-5` por defecto; se puede cambiar a Sonnet o Haiku para abaratar).
 - **Progreso**: almacenamiento local del navegador; exportable desde Ajustes.
 - **Tests**: `node --test proa/tests/*.test.js`.

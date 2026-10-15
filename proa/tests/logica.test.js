@@ -88,3 +88,23 @@ test('audio de la sesión: cada frase empieza tras la anterior y su pausa', asyn
   assert.deepEqual(starts, [6, 9]);
   assert.equal(total, 6 + 2 + 1 + 3 + 0.5 + 10);
 });
+
+test('Kokoro: frases, tokens y recorte de silencio', async () => {
+  const { splitSentences, tokenize, trimSilence } = await import('../js/audio/kokoro.js');
+  assert.deepEqual(splitSentences('Mayday. I am on fire! Over?'), ['Mayday.', 'I am on fire!', 'Over?']);
+  assert.deepEqual(tokenize('ab z', { a: 1, b: 2, ' ': 16 }), [1, 2, 16]); // 'z' no está en el vocabulario
+  const pcm = new Float32Array(48000);
+  pcm.fill(0.5, 20000, 22000);
+  const out = trimSilence(pcm);
+  assert.ok(out.length < 6000 && out.length >= 2000, `recortado a ${out.length}`);
+});
+
+test('textos fijos con voz pre-generada: incluyen frases, guiones y examen', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const items = JSON.parse(execFileSync('node', [new URL('../tools/textos-voz.mjs', import.meta.url).pathname]).toString());
+  const texts = new Set(items.map((i) => i.text));
+  assert.ok(texts.has('Person overboard.'));
+  assert.ok(texts.has('Hombre al agua.'));
+  assert.ok(texts.has('Cuatro… tres… dos… uno.'));
+  assert.ok([...texts].some((t) => t.startsWith('Dilo en inglés marítimo')));
+});

@@ -1,7 +1,7 @@
 // Generador local de guiones de autohipnosis (funciona sin conexión ni IA).
 // Estructura clásica: inducción → profundización → aprendizaje → sugestiones → salida.
 
-const INDUCCION = [
+export const INDUCCION = [
   'Busca una postura cómoda, sentado o tumbado, y ponte los auriculares.',
   'Cierra los ojos suavemente. Inspira despacio por la nariz… y suelta el aire por la boca.',
   'Otra vez. Inspira… y suelta. Con cada respiración tu cuerpo se vuelve más pesado y tranquilo.',
@@ -12,7 +12,7 @@ const INDUCCION = [
   'Relaja el pecho, el abdomen, las piernas, hasta la punta de los pies.',
 ];
 
-const PROFUNDIZACION = [
+export const PROFUNDIZACION = [
   'Ahora imagina una escalera que baja hacia el puente de mando. Tiene diez escalones.',
   'Con cada número bajas un escalón y te relajas el doble.',
   'Diez… nueve… ocho… cada vez más tranquilo.',
@@ -21,14 +21,14 @@ const PROFUNDIZACION = [
   'Estás en el puente. Todo está en orden. Tu mente está preparada para aprender sin esfuerzo.',
 ];
 
-const SUGESTIONES = [
+export const SUGESTIONES = [
   'Cada vez que escuches estas frases, las recordarás con más facilidad.',
   'Cuando hables por radio, tu voz sonará clara, tranquila y segura.',
   'El inglés marítimo te resulta cada día más natural, como el ritmo de las olas.',
   'Tu memoria guarda cada palabra en su lugar del barco, lista para cuando la necesites.',
 ];
 
-const SALIDA = [
+export const SALIDA = [
   'Ahora vamos a volver. Voy a contar del uno al cinco.',
   'Uno… empiezas a notar tu cuerpo.',
   'Dos… mueve despacio los dedos de las manos y de los pies.',

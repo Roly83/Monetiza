@@ -1,5 +1,6 @@
 // Voz: síntesis (TTS) y reconocimiento (STT) con las APIs del navegador. Sin coste ni servidor.
 import { store } from '../core/store.js';
+import { speakNatural, stopNatural } from './voice.js';
 
 const synth = globalThis.speechSynthesis;
 const Recognition = globalThis.SpeechRecognition || globalThis.webkitSpeechRecognition;
@@ -38,7 +39,24 @@ function pickVoice(lang) {
 let cancelled = false;
 
 // Habla un texto y resuelve al terminar. rate: velocidad (1 = normal).
-export function speak(text, lang = LANGS.en, { rate, pitch = 1, volume = 1 } = {}) {
+// Usa la voz natural si está activada y descargada; si falla, la del navegador.
+export async function speak(text, lang = LANGS.en, opts = {}) {
+  if (!text) return;
+  cancelled = false;
+  if (store.get().settings.voiceEngine !== 'browser') {
+    const rate = opts.rate ?? (lang.startsWith('en') ? store.get().settings.rateEn : 1);
+    try {
+      await speakNatural(text, lang.slice(0, 2), { rate: Math.max(0.5, Math.min(1.5, rate)) });
+      return;
+    } catch {
+      // Texto no pre-generado y modelo sin descargar (o fallo): se usa la voz del navegador.
+    }
+  }
+  if (cancelled) return;
+  return speakBrowser(text, lang, opts);
+}
+
+function speakBrowser(text, lang, { rate, pitch = 1, volume = 1 } = {}) {
   return new Promise((resolve) => {
     if (!synth || !text) return resolve();
     cancelled = false;
@@ -57,6 +75,7 @@ export function speak(text, lang = LANGS.en, { rate, pitch = 1, volume = 1 } = {
 export function stopSpeaking() {
   cancelled = true;
   synth?.cancel();
+  stopNatural();
 }
 
 export const wasCancelled = () => cancelled;

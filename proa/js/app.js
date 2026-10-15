@@ -66,5 +66,15 @@ window.addEventListener('proa:store', updateStatus);
 route();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(() => {
+    // La primera vez el service worker aún no controla la página: se recarga una vez para activar
+    // el aislamiento (necesario para usar varios hilos en la voz neuronal).
+    if (!globalThis.crossOriginIsolated && !sessionStorage.getItem('proa:coi-reload')) {
+      navigator.serviceWorker.ready.then(() => {
+        sessionStorage.setItem('proa:coi-reload', '1');
+        if (navigator.serviceWorker.controller) location.reload();
+        else navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true });
+      });
+    }
+  }).catch(() => {});
 }

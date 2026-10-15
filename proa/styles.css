@@ -168,3 +168,6 @@ details.live summary { cursor: pointer; font-weight: 600; padding: 10px 0; }
 .player h2 { margin: 0; }
 .pill { white-space: nowrap; }
 @media (max-width: 480px) { .brand span { display: none; } }
+.form.flat { background: transparent; border: 0; padding: 0; margin: 0; }
+details summary { cursor: pointer; font-weight: 600; }
+.banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; background: linear-gradient(135deg, #127ea82a, #0b223920); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; margin: 12px 0; }

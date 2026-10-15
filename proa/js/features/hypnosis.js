@@ -5,7 +5,7 @@ import { UNITS, unitById } from '../data/curriculum.js';
 import { generateScript, estimateSeconds } from './hypnosis-script.js';
 import { BinauralEngine, PRESETS } from '../audio/binaural.js';
 import { speak, stopSpeaking, wait, LANGS, support } from '../audio/speech.js';
-import { VOICES, voiceById, isVoiceDownloaded } from '../audio/neural-tts.js';
+import { ENGINES, voicesFor, selectedVoices, pendingDownloadMb, missingBaked } from '../audio/voice.js';
 import { files } from '../core/idb.js';
 
 const engine = new BinauralEngine();
@@ -186,47 +186,76 @@ function audioSection(session, cleanups, onChange = () => {}) {
   };
 
   const prepare = () => {
-    const esSel = h('select', {}, VOICES.es.map((v) => h('option', { value: v.id, selected: v.id === s.neuralEs }, v.label)));
-    const enSel = h('select', {}, VOICES.en.map((v) => h('option', { value: v.id, selected: v.id === s.neuralEn }, v.label)));
+    const engineSel = h('select', {}, Object.entries(ENGINES).filter(([k]) => k !== 'browser')
+      .map(([k, label]) => h('option', { value: k, selected: k === (s.voiceEngine === 'piper' ? 'piper' : 'kokoro') }, label)));
+    const esSel = h('select');
+    const enSel = h('select');
     const sizeNote = h('p', { class: 'muted small' });
-    const updateNote = async () => {
-      const pending = [];
-      for (const sel of [esSel, enSel]) if (!(await isVoiceDownloaded(sel.value))) pending.push(voiceById(sel.value));
-      sizeNote.textContent = pending.length
-        ? `La primera vez se descargan las voces (${pending.reduce((t, v) => t + v.mb, 0)} MB en total). Mejor con wifi; después quedan guardadas.`
-        : 'Voces ya descargadas en este dispositivo.';
+    const fillVoices = () => {
+      const engine = engineSel.value;
+      const current = selectedVoices(engine);
+      const list = voicesFor(engine);
+      esSel.replaceChildren(...list.es.map((v) => h('option', { value: v.id, selected: v.id === current.es }, v.label)));
+      enSel.replaceChildren(...list.en.map((v) => h('option', { value: v.id, selected: v.id === current.en }, v.label)));
+      updateNote();
     };
+    const updateNote = async () => {
+      const voices = { en: enSel.value, es: esSel.value };
+      if (engineSel.value === 'kokoro') {
+        const items = session.segments.map((x) => ({ text: x.text, lang: x.lang, rate: x.lang === 'en' ? 0.8 : 0.88 }));
+        const missing = await missingBaked(items, voices);
+        if (!missing) { sizeNote.textContent = '✅ Voz natural lista para esta sesión: se prepara en pocos segundos y sin descargas.'; return; }
+        const mb = await pendingDownloadMb('kokoro', voices);
+        sizeNote.textContent = `${missing} frases son nuevas y se generan en el móvil (puede tardar varios minutos).${mb ? ` La primera vez se descarga el modelo de voz (${mb} MB, mejor con wifi).` : ''}`;
+        return;
+      }
+      const mb = await pendingDownloadMb(engineSel.value, voices);
+      sizeNote.textContent = `${mb ? `La primera vez se descarga la voz (${mb} MB). Mejor con wifi; después queda guardada. ` : 'Voz ya descargada en este dispositivo. '}La voz rápida se genera en poco tiempo, pero suena menos natural.`;
+    };
+    engineSel.addEventListener('change', fillVoices);
     esSel.addEventListener('change', updateNote);
     enSel.addEventListener('change', updateNote);
-    updateNote();
+    fillVoices();
     const bar = h('progress', { class: 'hidden', max: 1, value: 0 });
     const msg = h('p', { class: 'now-playing', 'aria-live': 'polite' });
     const go = h('button', { class: 'btn primary big' }, '🎙️ Preparar audio');
     go.addEventListener('click', async () => {
-      go.disabled = true;
-      esSel.disabled = enSel.disabled = true;
+      const engine = engineSel.value;
+      const voices = { en: enSel.value, es: esSel.value };
+      go.disabled = engineSel.disabled = esSel.disabled = enSel.disabled = true;
       bar.classList.remove('hidden');
-      store.update((st) => { st.settings.neuralEs = esSel.value; st.settings.neuralEn = enSel.value; });
+      store.update((st) => {
+        if (engine === 'piper') { st.settings.neuralEs = voices.es; st.settings.neuralEn = voices.en; }
+        else { st.settings.kokoroEs = voices.es; st.settings.kokoroEn = voices.en; }
+      });
       try {
         const { renderSession } = await import('./hypnosis-render.js');
-        const { blob, seconds } = await renderSession(session, { es: esSel.value, en: enSel.value }, (phase, f, detail) => {
+        const started = Date.now();
+        const { blob, seconds } = await renderSession(session, { engine, voices }, (phase, f, detail) => {
           bar.value = f;
-          msg.textContent = detail;
+          const elapsed = (Date.now() - started) / 1000;
+          const eta = phase === 'voz' && f > 0.05 ? ` · quedan ~${Math.ceil((elapsed / f - elapsed) / 60)} min` : '';
+          msg.textContent = detail + eta;
         });
         await files.put(session.id, blob);
-        store.update((st) => { const x = st.sessions.find((y) => y.id === session.id); if (x) x.audioSeconds = seconds; });
+        const modelDownloaded = !(await pendingDownloadMb(engine, voices));
+        store.update((st) => {
+          const x = st.sessions.find((y) => y.id === session.id);
+          if (x) x.audioSeconds = seconds;
+          if (modelDownloaded) st.settings.naturalReady = { ...st.settings.naturalReady, [engine]: true };
+        });
         form.remove();
         showAudio(blob);
         onChange();
         toast('Audio listo y guardado en el dispositivo.');
       } catch (e) {
         msg.textContent = `No se pudo preparar el audio: ${e.message}`;
-        go.disabled = false;
-        esSel.disabled = enSel.disabled = false;
+        go.disabled = engineSel.disabled = esSel.disabled = enSel.disabled = false;
       }
     });
     const form = h('div', { class: 'prepare' },
-      h('p', {}, 'Genera la sesión como archivo de audio con voces naturales. Así sigue sonando con la pantalla apagada, en segundo plano y desde los controles de la pantalla de bloqueo.'),
+      h('p', {}, 'Genera la sesión como archivo de audio con voz natural. Así sigue sonando con la pantalla apagada, en segundo plano y desde los controles de la pantalla de bloqueo.'),
+      h('label', {}, 'Motor de voz', engineSel),
       h('label', {}, 'Voz en español', esSel),
       h('label', {}, 'Voz en inglés', enSel),
       sizeNote, go, bar, msg,

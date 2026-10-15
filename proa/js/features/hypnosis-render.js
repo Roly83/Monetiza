@@ -1,6 +1,6 @@
 // Convierte una sesión de autohipnosis en un archivo MP3 (voz neuronal + fondo binaural en estéreo).
 // Un archivo de audio se reproduce con la pantalla apagada y desde los controles de bloqueo.
-import { synthesize } from '../audio/neural-tts.js';
+import { synth } from '../audio/voice.js';
 import { buildBed } from '../audio/binaural.js';
 
 const SAMPLE_RATE = 22050;
@@ -55,16 +55,18 @@ async function encodeMp3(buffer, onProgress) {
   return new Blob(parts, { type: 'audio/mpeg' });
 }
 
-// session: { segments, preset, ocean }. voices: { es, en } ids de voz.
+// session: { segments, preset, ocean }. voice: { engine: 'kokoro'|'piper', voices: { es, en } }.
 // onProgress(fase, fracción 0-1, detalle)
-export async function renderSession(session, voices, onProgress = () => {}) {
+export async function renderSession(session, { engine, voices }, onProgress = () => {}) {
   const segs = session.segments;
   const audios = [];
   for (let i = 0; i < segs.length; i++) {
     const s = segs[i];
     onProgress('voz', i / segs.length, `Generando voz ${i + 1}/${segs.length}`);
     const isEn = s.lang === 'en';
-    audios.push(await synthesize(s.text, isEn ? voices.en : voices.es, {
+    audios.push(await synth(s.text, isEn ? 'en' : 'es', {
+      engine,
+      voices,
       rate: isEn ? 0.8 : 0.88,
       onProgress: (l, t) => onProgress('descarga', t ? l / t : 0, `Descargando voz ${isEn ? 'inglesa' : 'española'} (${Math.round(l / 1e6)} MB${t ? ` de ${Math.round(t / 1e6)}` : ''})`),
     }));
