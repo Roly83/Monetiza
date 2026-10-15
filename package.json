@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/*.test.js",
+    "test": "node --test tests/*.test.js proa/tests/*.test.js",
     "articulo": "node scripts/generar-articulo.mjs",
     "producto": "python3 scripts/generar-producto.py"
   },

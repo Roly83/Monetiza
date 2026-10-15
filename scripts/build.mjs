@@ -203,6 +203,8 @@ ${articulos.slice(0, 20).map((a) => `<item><title>${esc(a.titulo)}</title><link>
 if (config.adsense.clienteId) {
   writeFileSync(join(dist, 'ads.txt'), `google.com, ${config.adsense.clienteId.replace('ca-', '')}, DIRECT, f08c47fec0942fa0\n`);
 }
+// App de inglés marítimo (estática): se publica en /proa/.
+cpSync(join(raiz, 'proa'), join(dist, 'proa'), { recursive: true, filter: (src) => !src.includes(`${'/'}tests`) });
 if (existsSync(join(raiz, 'CNAME'))) cpSync(join(raiz, 'CNAME'), join(dist, 'CNAME'));
 writeFileSync(join(dist, '.nojekyll'), '');
 
