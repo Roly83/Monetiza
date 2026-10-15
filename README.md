@@ -4,7 +4,7 @@ Web de **calculadoras y guías para autónomos en España** que se gestiona en p
 afiliación, publicidad y un producto digital propio.
 
 - 📈 Plan de negocio, proyecciones y costes: [`docs/PLAN-DE-NEGOCIO.md`](docs/PLAN-DE-NEGOCIO.md)
-- 🌐 Web (cuando actives GitHub Pages): https://roly83.github.io/monetiza
+- 🌐 Web (cuando actives GitHub Pages): https://roly83.github.io/Monetiza
 
 ## Qué incluye
 
