@@ -748,8 +748,28 @@ export const setup = {
     Object.assign(p.elec, { busF: F_NOM, busV: V_NOM });
   },
   dead(p) {
+    // Todo parado: el generador de emergencia en LOCAL (no arranca solo) y el PMS en manual.
     p.elec.eg.tie = false;
+    p.elec.eg.lcp = 'local';
+    p.elec.pms = 'manual';
     p.elec.battery.soc = 0.85;
-    p.c.egfan.cmd = true;
+    p.elec.flaps.mode = 'manual';
+    p.c.egfan.cmd = false;
   },
 };
+
+// Hitos del arranque desde buque muerto (planta eléctrica y aire de arranque).
+export const STARTUP = [
+  { phase: 1, en: 'Emergency generator running', es: 'Generador de emergencia en marcha', check: (p) => ['running', 'cooldown'].includes(p.elec.eg.state) || p.elec.dg.some((g) => g.breaker) },
+  { phase: 1, en: 'Emergency switchboard energized', es: 'Cuadro de emergencia con tensión', check: (p) => p.sig.esbLive },
+  { phase: 1, en: 'Emergency generator room flaps open and fan running', es: 'Flaps del local del G. E. abiertos y ventilador en marcha', check: (p) => (p.elec.flaps.pos > 0.9 && p.c.egfan.run) || p.elec.eg.state === 'stopped' && p.elec.dg.some((g) => g.breaker) },
+  { phase: 1, en: 'Battery charger on', es: 'Cargador de baterías encendido', check: (p) => p.elec.battery.charging },
+  { phase: 1, en: 'Emergency air compressor charging the emergency receiver', es: 'Compresor de emergencia cargando la botella de emergencia', check: (p) => p.c.eac.run || p.c.emr.press > 20 },
+  { phase: 2, en: 'Starting air for the diesel generators above 10 bar', es: 'Aire de arranque de los generadores por encima de 10 bar', check: (p) => (p.sig.dgStartAir ?? 0) > 10 },
+  { phase: 2, en: 'First diesel generator on line (MSB energized)', es: 'Primer generador diésel acoplado (MSB con tensión)', check: (p) => p.elec.dg.some((g) => g.breaker) },
+  { phase: 2, en: 'ESB fed from the MSB and emergency generator back in AUTO', es: 'ESB alimentado desde el MSB y generador de emergencia otra vez en AUTO', check: (p) => p.elec.eg.tie && p.sig.msbLive && p.elec.eg.mode === 'auto' && p.elec.eg.lcp === 'remote' },
+  { phase: 2, en: 'Main air compressors running, receivers above 25 bar', es: 'Compresores principales en marcha, botellas por encima de 25 bar', check: (p) => (p.c.mac1.run || p.c.mac2.run) && p.c.mr1.press > 25 },
+  { phase: 3, en: 'Second diesel generator in parallel', es: 'Segundo generador diésel en paralelo', check: (p) => p.elec.dg.filter((g) => g.breaker).length >= 2 },
+  { phase: 3, en: 'Power management in AUTO', es: 'Gestión de potencia en AUTO', check: (p) => p.elec.pms === 'auto' },
+];
+

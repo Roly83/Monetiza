@@ -29,9 +29,9 @@ import mistView from './mist.js';
 import refrigView from './refrig.js';
 import acView from './ac.js';
 import incineratorView from './incinerator.js';
-import { options, assessment, config } from './pages.js';
+import { startup, options, assessment, config } from './pages.js';
 
 export const VIEWS = [
   controlView, bridgeView, dgView, msbView, egView, esbView, meView, sterntubeView, airView, coolingView, fuelView, fcmView, hfo1View, hfo2View, lubeView, lotView, melopView, dglopView, steamView, fwgView, ballastView, sanitaryView, bilgeView, steeringView, sewageView, co2View, mistView, refrigView, acView, incineratorView,
-  options, assessment, config,
+  startup, options, assessment, config,
 ];

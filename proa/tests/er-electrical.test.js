@@ -76,8 +76,13 @@ test('ER eléctrica: alimentar el MSB desde el generador de emergencia y disparo
 
 test('ER eléctrica: buque muerto — sin aire no arranca un DG; con el compresor de emergencia sí', () => {
   const p = createSim('dead');
-  assert.ok(p.sig.esbLive, 'el G. E. arranca solo y da tensión al ESB');
-  act(p, 'setPms', 'manual');
+  assert.equal(p.sig.esbLive, false, 'en buque muerto todo está parado');
+  assert.equal(act(p, 'egStart'), null);
+  run(p, 8);
+  act(p, 'egMode', 'manual');
+  assert.equal(act(p, 'egBreakerOn'), null);
+  run(p, 1);
+  assert.ok(p.sig.esbLive, 'el G. E. da tensión al ESB');
   assert.ok(act(p, 'dgStart', 1), 'sin aire de arranque');
   assert.equal(act(p, 'start', 'eac'), null);
   act(p, 'open', 'v-emr-dg');

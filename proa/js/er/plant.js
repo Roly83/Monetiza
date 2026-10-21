@@ -55,6 +55,19 @@ export function run(p, seconds, dt = 0.1) {
 export const ACTIONS = Object.assign({}, genericActions, ...ALL.map((m) => m.actions ?? {}));
 export const FAULTS = ALL.flatMap((m) => m.FAULTS ?? []);
 
+// Lista de arranque desde buque muerto: hitos de todos los sistemas agrupados por fases.
+export const PHASES = [
+  { en: 'Emergency power', es: 'Energía de emergencia' },
+  { en: 'Main power', es: 'Energía principal' },
+  { en: 'Auxiliary services', es: 'Servicios auxiliares' },
+  { en: 'Hotel services and environment', es: 'Servicios de habilitación y entorno' },
+  { en: 'Main engine preparation and departure', es: 'Preparación del motor principal y salida' },
+];
+const DEFAULT_PHASE = new Map([[electrical, 2], [air, 2], [safety, 2], [cooling, 3], [fuel, 3], [lube, 3], [steam, 3], [water, 4], [hull, 4], [sewage, 4], [incinerator, 4], [hvac, 4], [engine, 5], [steering, 5]]);
+export const STARTUP = ALL.flatMap((m) => (m.STARTUP ?? []).map((s, i) => ({ ...s, phase: s.phase ?? DEFAULT_PHASE.get(m) ?? 3, order: i })))
+  .map((s, i) => ({ ...s, idx: i }))
+  .sort((a, b) => a.phase - b.phase || a.idx - b.idx);
+
 // Ejecuta una acción del operador. Devuelve null o un mensaje { en, es } si no se puede.
 export function act(p, name, ...args) {
   const fn = ACTIONS[name];

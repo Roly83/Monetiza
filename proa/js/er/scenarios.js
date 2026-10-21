@@ -1,6 +1,7 @@
 // Prácticas evaluadas (Assessment): cada una prepara la planta, fija objetivos que se comprueban
 // en vivo y puntúa al terminar (objetivos, tiempo y penalizaciones por errores).
 import { log } from './core.js';
+import { STARTUP } from './plant.js';
 import { connected } from './model/electrical.js';
 import groupA from './scenarios/a.js';
 import groupB from './scenarios/b.js';
@@ -80,6 +81,13 @@ export const SCENARIOS = [
       { en: 'MSB energized from the emergency generator for 30 s', es: 'MSB con tensión desde el generador de emergencia durante 30 s', check: (p) => p.sig.msbLive && p.elec.eg.tie && p.elec.eg.breaker, hold: 30 },
     ],
   },
+  {
+    id: 'full-startup', setup: 'dead', minutes: 90,
+    en: 'Dead ship to sea: complete start-up', es: 'De buque muerto a navegar: arranque completo',
+    brief: { en: 'Bring the whole ship from dead ship to sea going: emergency power, main power, auxiliary services, main engine and departure. Follow the start-up checklist.', es: 'Lleva el buque entero de buque muerto a navegar: energía de emergencia, energía principal, servicios auxiliares, motor principal y salida. Sigue la lista de arranque.' },
+    prepare() {},
+    goals: STARTUP.map((s) => ({ en: s.en, es: s.es, check: s.check })),
+  },
   ...groupA, ...groupB, ...groupC, ...groupD, ...groupE,
 ];
 
@@ -91,7 +99,9 @@ export function checkScenario(ctx, session) {
   const sc = s.def;
   sc.goals.forEach((g, i) => {
     if (s.goals[i]) return;
-    if (g.check(p)) {
+    let ok = false;
+    try { ok = Boolean(g.check(p)); } catch { ok = false; }
+    if (ok) {
       s.hold[i] = (s.hold[i] ?? 0) + (p.t - (s.lastT ?? p.t));
       if (s.hold[i] >= (g.hold ?? 0)) {
         s.goals[i] = p.t - s.startT;

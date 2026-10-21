@@ -3,7 +3,7 @@ import { h } from '../../core/ui.js';
 import { store } from '../../core/store.js';
 import { bi } from '../ui/widgets.js';
 import { btn } from '../ui/faceplate.js';
-import { SETUPS, FAULTS, setFault } from '../plant.js';
+import { SETUPS, FAULTS, setFault, STARTUP, PHASES } from '../plant.js';
 import { SCENARIOS, startScenario, session } from '../scenarios.js';
 
 const settings = () => ({ speed: 1, sound: true, voice: true, ...(store.get().er ?? {}) });
@@ -90,6 +90,41 @@ export const config = {
         h('h2', {}, bi('Clear all', 'Quitar todo')),
         btn('Clear all malfunctions', 'Quitar todas las averías', () => { for (const k of Object.keys(ctx.p().faults)) setFault(ctx.p(), k, false); ctx.nav('control'); }),
       ),
+    };
+  },
+};
+
+// Lista de arranque del buque (de buque muerto a navegar), con los hitos marcados en vivo.
+export const startup = {
+  id: 'startup', en: 'Start-up checklist', es: 'Lista de arranque del buque', page: true,
+  render(ctx) {
+    const items = STARTUP.map((s) => ({ s, li: h('li', {}, '⬜ ', bi(s.en, s.es)) }));
+    const bar = h('progress', { max: STARTUP.length, value: 0 });
+    const count = h('strong');
+    const el = h('div', {},
+      h('p', { class: 'muted' }, bi('From dead ship to sea going. Each step is ticked automatically when the plant reaches it. Steps can be done in any order, but this is the safe sequence.', 'De buque muerto a navegar. Cada paso se marca solo cuando la planta lo cumple. Se pueden hacer en otro orden, pero esta es la secuencia segura.')),
+      h('div', { class: 'row' },
+        btn('New dead ship', 'Empezar en buque muerto', () => { if (confirm('¿Empezar en buque muerto? Se pierde la situación actual.')) { ctx.newSim('dead'); ctx.nav('startup'); } }, 'primary'),
+        btn('Start as assessment', 'Hacerlo como práctica evaluada', () => { if (confirm('¿Empezar la práctica evaluada en buque muerto?')) { startScenario(ctx, session, 'full-startup'); ctx.nav('assessment'); } })),
+      h('div', { class: 'row' }, count, bar),
+      ...PHASES.map((ph, i) => {
+        const list = items.filter((x) => x.s.phase === i + 1);
+        return list.length ? h('section', { class: 'card' }, h('strong', {}, `${i + 1}. `, bi(ph.en, ph.es)), h('ol', { class: 'goals' }, list.map((x) => x.li))) : null;
+      }).filter(Boolean));
+    return {
+      el,
+      update(p) {
+        let n = 0;
+        for (const x of items) {
+          let ok = false;
+          try { ok = Boolean(x.s.check(p)); } catch { ok = false; }
+          if (ok) n++;
+          x.li.classList.toggle('ok', ok);
+          x.li.firstChild.textContent = ok ? '✅ ' : '⬜ ';
+        }
+        bar.value = n;
+        count.textContent = `${n} / ${STARTUP.length}`;
+      },
     };
   },
 };
