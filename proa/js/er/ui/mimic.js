@@ -23,7 +23,7 @@ function bilabel(g, x, y, en, es, size = 13, anchor = 'middle') {
   t.textContent = en;
   g.append(t);
   if (es) {
-    const s = svg('text', { x, y: y + size * 0.95, class: 'mm-es', 'text-anchor': anchor, 'font-size': size * 0.72 });
+    const s = svg('text', { x, y: y + size * 1.05, class: 'mm-es', 'text-anchor': anchor, 'font-size': size * 0.72 });
     s.textContent = es;
     g.append(s);
   }
@@ -121,7 +121,7 @@ export function mimic(elements, ctx, { w = 1000, hgt = 620 } = {}) {
         const rect = svg('rect', { x: el.x, y: el.y, width: w, height: 22, rx: 3, class: 'mm-valbox' });
         const v = svgText(el.x + w - 6, el.y + 16, '', 'mm-val', 'end');
         g.append(rect, v);
-        if (el.en) bilabel(g, el.x + w / 2, el.y - 17, el.en, el.es, 9);
+        if (el.en) bilabel(g, el.x + w / 2, el.y - 18, el.en, el.es, 9);
         updates.push((p) => {
           let x;
           try { x = el.get(p); } catch { x = null; }

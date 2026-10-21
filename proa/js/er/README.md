@@ -56,6 +56,7 @@ Acciones genéricas ya disponibles: `start, stop, standby, resetTrip, open, clos
 | hfoServicePct, doServicePct, meFuelPress, meFuelTemp, meFuelVisc, meFuelOk, dgFuelOk, meFuelType 'HFO'|'DO' | fuel | combustible |
 | meLoPress, meLoTemp, meLoOk, sternLoOk | lube | aceite |
 | steamPress, steamAvail (0..1) | steam | vapor |
+| steamUse { id: kg/h } | consumidores de vapor | cada consumidor declara su gasto y steam lo suma |
 | meRpm (con signo), meLoad (0..1), meRunning, mePowerKw, shipSpeed (kn), meControl, telegraph | engine | motor principal |
 | rudderAngle, helmOrder | steering / bridge | servo |
 | fwTankPct, fwgProduction (t/día), fwgHeatKw | water | agua dulce |

@@ -10,7 +10,7 @@ Aplicación web (instalable en el móvil) para aprender inglés marítimo con m�
 | 🌊 **Hipnosis** | Genera sesiones de **autohipnosis con sonido binaural** (alfa, theta, descenso alfa→theta, beta) y oleaje. Guion: inducción → profundización → frases EN/ES → sugestiones → despertar. Se guardan en una biblioteca y se pueden **repetir sin límite** (1, 2, 3 veces o en bucle). **Modo pantalla apagada**: convierte la sesión en un MP3 con voces neuronales que suena en segundo plano, con controles en la pantalla de bloqueo y opción de descarga | No (con IA, guion personalizado) |
 | 🔤 **Traductor** | Español ⇄ inglés por texto o voz, con la frase SMCP equivalente | Sin IA: solo glosario |
 | 🎧 **Intérprete** | Media entre 2 a 4 personas que hablan español e inglés. **Por turnos con botón** o **automático manos libres**. Identifica a cada persona por su idioma; lee la traducción en voz alta y permite descargar la transcripción | Sí |
-| ⚡ **Simulador** | Cuadro del **generador de emergencia** en una ventana aparte (`simulador.html`): instrumentos A, V, kW, kVAr y kΩ con selectores de fase, pilotos, pulsadores del interruptor, RESET y selectores de control. Simula apagón con arranque automático, maniobra manual, alimentación del MSB, disparo por sobrecorriente y fallo de aislamiento. 7 ejercicios guiados con parte final en inglés, guía bilingüe y modo información | No |
+| ⚙️ **Simulador de sala de máquinas** | Ventana aparte (`simulador.html`) con la sala de máquinas completa, como los simuladores profesionales: selección de sistemas, esquemas interactivos y fichas de cada equipo, alarmas con bocina y voz en inglés. **Planta eléctrica** (3 generadores, PMS, sincronización, cuadro principal, generador y cuadro de emergencia, baterías, arranque hidráulico), **motor principal** con telégrafo y puestos de control, **puente**, **servomotor**, **bocina**, aire comprimido, refrigeración y contraincendios, combustible con módulo de acondicionamiento y depuradoras, lubricación, vapor, generador de agua dulce, agua sanitaria, lastre, sentinas con separador, aguas residuales, incinerador, CO2, agua nebulizada, planta frigorífica y aire acondicionado. **Arranque completo desde buque muerto** con lista de comprobación, prácticas evaluadas con nota y modo instructor con averías | No |
 | 📻 **Examen** | Examen oral como conversación por radio VHF o a bordo, solo sobre las unidades estudiadas, con nota por respuesta e informe final | Sin IA: examen guiado |
 
 ## Cómo se usa
@@ -44,6 +44,7 @@ Oscuro por defecto. Se cambia con el botón 🌙/☀️ de la barra superior o e
   a MP3 con [lamejs](https://github.com/zhuker/lamejs) (LGPL-3.0, en `vendor/`). El audio se guarda en IndexedDB.
 - **IA**: Claude (`claude-opus-5-5` por defecto; se puede cambiar a Sonnet o Haiku para abaratar).
 - **Progreso**: almacenamiento local del navegador; exportable desde Ajustes.
+- **Simulador**: modelo de planta en `js/er/model/` (lógica pura, probada con node) y vistas en `js/er/views/`; guía para desarrolladores en `js/er/README.md`.
 - **Tests**: `node --test proa/tests/*.test.js`.
 
 ## Aviso
