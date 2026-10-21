@@ -1,0 +1,94 @@
+/* Simulador de sala de máquinas — grupo A: motor principal, puente, bocina y servomotor */
+
+/* Consola del puente */
+.a-bridge { display: grid; grid-template-columns: minmax(230px, 270px) minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.a-panel { display: grid; gap: 10px; background: linear-gradient(180deg, #a7aaa4, #8f938d); border: 3px solid #5d6367; border-radius: 6px; padding: 12px; color: #111; }
+.a-panel .readouts .readout, .a-ecr .readout { color: var(--text); }
+.a-meter .meter-cell { width: 150px; }
+.a-prot { margin: 0; padding: 6px 8px; border-radius: 6px; background: #f4f4ef; color: #1b3a1b; font-size: 0.85rem; }
+.a-prot.bad { background: #ffe2e2; color: #7a0d0d; font-weight: 700; }
+
+/* Telégrafo de órdenes */
+.tg { display: grid; gap: 8px; background: #22282c; border: 3px solid #5d6367; border-radius: 8px; padding: 10px; color: #eee; }
+.tg .plate { color: #111; }
+.tg-rows { display: grid; gap: 4px; }
+.tg-row { display: grid; grid-template-columns: 14px 1fr auto; gap: 6px; align-items: center; text-align: left; font: inherit; font-size: 0.82rem; font-weight: 700;
+  border: 1px solid #50585d; background: #313a40; color: #d9e1e4; border-radius: 6px; padding: 5px 8px; cursor: pointer; min-height: 40px; }
+.tg-row .bi small { color: #a9b6bb; font-weight: 500; }
+.tg-row.ahead { border-left: 5px solid #2fa356; }
+.tg-row.astern { border-left: 5px solid #d62828; }
+.tg-row.stop { border-left: 5px solid #e0a100; }
+.tg-row .tg-rpm { font-variant-numeric: tabular-nums; color: #9fb1b8; }
+.tg-row:hover { filter: brightness(1.15); }
+.tg-row.on { background: #f1e7a8; color: #111; border-color: #f1c40f; box-shadow: 0 0 10px #f1c40f88; }
+.tg-row.on .bi small, .tg-row.on .tg-rpm { color: #333; }
+.tg-row.on .tg-mark::before { content: "▶"; }
+.tg-row.order { animation: tgflash 1s steps(2) infinite; }
+.tg-row.order .tg-mark::before { content: "◆"; color: #ffb000; }
+@keyframes tgflash { 50% { background: #6b5200; } }
+@media (prefers-reduced-motion: reduce) { .tg-row.order { animation: none; background: #6b5200; } }
+
+/* Timón */
+.helm-row { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.btn.helm { min-width: 54px; padding: 6px 8px; font-variant-numeric: tabular-nums; }
+.btn.helm.port { border-left: 4px solid #d62828; }
+.btn.helm.stbd { border-right: 4px solid #2fa356; }
+.helm-slider { display: grid; gap: 4px; background: #f4f4ef; padding: 6px 8px; border-radius: 6px; color: #222; }
+.helm-slider input { width: 100%; }
+.a-pump { display: grid; gap: 6px; justify-items: center; border-top: 2px solid #6d716b; padding-top: 8px; }
+
+/* Consola de la ECR */
+.a-ecr { display: grid; gap: 10px; }
+.a-ecr-grid { display: grid; grid-template-columns: minmax(230px, 280px) 1fr; gap: 12px; align-items: start; }
+.a-ecr-main { display: grid; gap: 10px; }
+.a-ecr.compact .a-ecr-grid { grid-template-columns: 1fr; }
+.a-ecr.compact .a-meter .meter-cell { width: 110px; }
+.a-ilk { font-size: 0.85rem; padding: 6px 8px; border-radius: 6px; background: var(--bg); border-left: 5px solid var(--run); }
+.a-ilk.bad { border-left-color: var(--warn); }
+.a-ilk ul { margin: 4px 0 0; padding-left: 18px; }
+.a-cuts .btn { min-width: 84px; }
+
+/* Esquemas propios */
+.a-cyl .a-cyl-fill { fill: var(--run); opacity: 0.6; }
+.a-cyl[data-state="warm"] .a-cyl-fill { fill: var(--warn); }
+.a-cyl[data-state="hot"] .a-cyl-fill { fill: var(--alarm); opacity: 0.85; }
+.a-cyl[data-state="hot"] > .mm-body { stroke: var(--alarm); stroke-width: 3; }
+.a-cyl[data-state="cut"] > .mm-body { stroke-dasharray: 6 4; fill: color-mix(in srgb, var(--stop) 30%, var(--mm-box)); }
+.a-cyl-n { fill: var(--mm-text); font: 800 20px system-ui, sans-serif; text-anchor: middle; }
+.a-tiller { fill: var(--mm-line); }
+.a-rudder { fill: color-mix(in srgb, var(--mm-line) 70%, var(--mm-box)); stroke: var(--mm-line); stroke-width: 2; }
+.a-shaft { fill: #8a949c; stroke: var(--mm-line); stroke-width: 1; }
+.a-shaft.turning { fill: url(#none); stroke-dasharray: 8 6; animation: flow 0.6s linear infinite; stroke-width: 3; }
+.a-seal { fill: var(--f-lo); stroke: var(--mm-line); stroke-width: 2; }
+.a-brg { fill: color-mix(in srgb, var(--f-lo) 40%, var(--mm-box)); stroke: var(--mm-line); stroke-width: 2; }
+[data-state="alarm"] > .a-brg { stroke: var(--alarm); }
+
+/* Instrumento de cero central */
+.a-dial { width: 100%; display: block; }
+.a-dial-cell { width: 220px !important; }
+.a-arc { fill: none; stroke-width: 6; }
+.a-arc.astern, .a-arc.port { stroke: #d62828; }
+.a-arc.ahead, .a-arc.stbd { stroke: #2fa356; }
+.a-dial-marker { stroke: #e0a100; stroke-width: 3; stroke-dasharray: 4 3; }
+.a-dial-val { font: 700 11px system-ui, sans-serif; text-anchor: middle; fill: #111; }
+.a-panel .panel-row .lamp-cell { width: 92px; }
+.a-panel .readouts { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.a-ecr .panel-row .lamp-cell { width: 92px; }
+.a-dial .meter-unit { font-size: 11px; text-anchor: middle; }
+.a-dial .meter-num { font-size: 10px; }
+.a-dial-cell .meter { max-width: 230px; }
+.a-panel .panel-row, .a-ecr .panel-row { gap: 8px; }
+.a-panel .panel-row .lamp-cell, .a-ecr .panel-row .lamp-cell { width: 84px; }
+.a-panel .lamp, .a-panel .push, .a-ecr .lamp, .a-ecr .push { width: 40px; height: 40px; }
+
+@media (max-width: 1200px) {
+  .a-bridge { grid-template-columns: minmax(230px, 270px) minmax(0, 1fr); }
+  .a-bridge > :last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .a-bridge, .a-ecr-grid { grid-template-columns: 1fr; }
+  .a-meter .meter-cell { width: 120px; }
+  .a-dial-cell { width: 200px !important; }
+  .a-ecr .panel-row .lamp-cell, .a-panel .panel-row .lamp-cell { width: 76px; }
+}
+
