@@ -31,8 +31,8 @@ export function renderHome(view) {
     h('div', { class: 'grid' },
       card('🔤', 'Traductor marítimo', 'Texto o voz, español ⇄ inglés, con la frase SMCP equivalente.', '#/traductor'),
       card('🎧', 'Intérprete', 'Media en una conversación entre personas que hablan español e inglés, por turnos o en automático.', '#/interprete'),
-      h('a', { class: 'card link', href: 'simulador.html', target: '_blank', rel: 'noopener' }, h('span', { class: 'icon big' }, '⚡'), h('strong', {}, 'Simulador: generador de emergencia ↗'),
-        h('p', {}, 'El cuadro del generador de emergencia en una ventana aparte: apagón, arranque, disparo y rearme, con ejercicios y vocabulario en inglés.')),
+      h('a', { class: 'card link', href: 'simulador.html', target: '_blank', rel: 'noopener' }, h('span', { class: 'icon big' }, '⚡'), h('strong', {}, 'Simulador de sala de máquinas ↗'),
+        h('p', {}, 'Sala de máquinas completa en una ventana aparte: planta eléctrica, motor principal y todos los sistemas auxiliares, con alarmas, averías y prácticas evaluadas en inglés y español.')),
     ),
   );
 }
