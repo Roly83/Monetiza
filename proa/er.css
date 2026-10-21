@@ -43,7 +43,7 @@
 .mimic-zoom .chip { width: 34px; padding: 4px 0; opacity: 0.85; }
 .mm-label { fill: var(--mm-text); font-family: system-ui, sans-serif; font-weight: 600; }
 .mm-es { fill: var(--mm-es); font-family: system-ui, sans-serif; font-style: italic; }
-.mm-val { fill: var(--mm-text); font: 700 11px system-ui, sans-serif; text-anchor: middle; }
+.mm-val { fill: var(--mm-text); font: 700 11px system-ui, sans-serif; }
 .mm-sb { fill: var(--standby); font: 800 11px system-ui, sans-serif; }
 .mm-icon { fill: var(--mm-text); font-size: 20px; text-anchor: middle; }
 .mm-click { cursor: pointer; }
