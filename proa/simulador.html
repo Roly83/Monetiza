@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Simulador · Generador de emergencia</title>
+  <meta name="description" content="Simulador del cuadro del generador de emergencia de un buque, con ejercicios y guía bilingüe.">
+  <meta name="theme-color" content="#0b2239">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="sim.css">
+  <script>
+    try { document.documentElement.dataset.theme = JSON.parse(localStorage.getItem('proa:v1') || '{}').settings?.theme || 'dark'; }
+    catch { document.documentElement.dataset.theme = 'dark'; }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">⚡ <strong>Simulador</strong> <span>Generador de emergencia</span></div>
+    <div class="topbar-right"><a class="pill off" href="./">← Proa</a><button id="theme-btn" class="theme-btn" type="button" aria-label="Cambiar tema"></button></div>
+  </header>
+  <nav class="tabs" id="sim-tabs" aria-label="Secciones del simulador"></nav>
+  <main id="sim" class="sim-main" tabindex="-1"></main>
+  <script type="module" src="js/sim/panel.js"></script>
+</body>
+</html>

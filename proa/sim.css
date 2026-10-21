@@ -1,0 +1,97 @@
+/* Simulador del cuadro del generador de emergencia */
+.sim-main { max-width: 1100px; }
+.topbar a.pill { color: #fff; text-decoration: none; }
+
+.eg-board {
+  --panel: #9a9fa3; --panel-dark: #80868b;
+  background: linear-gradient(180deg, var(--panel), var(--panel-dark));
+  border: 3px solid #5d6367; border-radius: 6px; padding: 14px; color: #111;
+  display: grid; gap: 18px; box-shadow: inset 0 0 0 2px #b9bec2, 0 6px 18px #0004;
+}
+.plate { background: #f4f4ef; color: #111; border: 1px solid #555; border-radius: 2px; padding: 3px 6px; font: 700 0.7rem/1.25 "Arial Narrow", Arial, sans-serif; text-align: center; letter-spacing: 0.02em; }
+.plate.title { justify-self: center; font-size: 0.95rem; padding: 4px 18px; }
+.plate.small { font-size: 0.62rem; }
+
+.meters { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: start; }
+.meter-col { display: grid; gap: 10px; justify-items: center; }
+.meter { padding: 0; border: 0; background: none; cursor: default; width: 100%; max-width: 150px; }
+.meter-face { width: 100%; display: block; }
+.meter-bezel { fill: #1b1d1f; }
+.meter-dial { fill: #fbfbf7; }
+.meter-arc { fill: none; stroke: #111; stroke-width: 1; }
+.meter-tick { stroke: #111; stroke-width: 1; }
+.meter-red { fill: none; stroke: #d62828; stroke-width: 4; }
+.meter-num { font: 600 8px Arial, sans-serif; text-anchor: middle; fill: #111; }
+.meter-unit { font: 700 14px Arial, sans-serif; fill: #111; }
+.meter-needle { stroke: #111; stroke-width: 1.8; stroke-linecap: round; }
+.meter-pivot { fill: #222; }
+
+.sel-cell, .lamp-cell { display: grid; gap: 6px; justify-items: center; align-content: start; }
+.selector { background: none; border: 0; padding: 0; cursor: pointer; }
+.knob-wrap { position: relative; display: block; width: 64px; height: 64px; }
+.knob { position: absolute; inset: 12px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #555, #111 70%); box-shadow: 0 2px 4px #0007; transform: rotate(var(--a, -45deg)); transition: transform 0.2s; }
+.knob-bar { position: absolute; left: 50%; top: 2px; width: 8px; margin-left: -4px; height: 36px; border-radius: 4px; background: #2a2a2a; border: 1px solid #000; box-shadow: inset 0 0 0 1px #555; }
+.knob-bar::before { content: ""; position: absolute; left: 2px; top: 2px; width: 2px; height: 8px; background: #fff; }
+.knob-marks span { position: absolute; left: 50%; top: 50%; font: 700 10px Arial, sans-serif; transform: rotate(var(--a)) translateY(-30px) rotate(calc(-1 * var(--a))); margin: -6px 0 0 -3px; }
+
+.lamps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.lamp, .push { width: 52px; height: 52px; border-radius: 50%; border: 5px solid #2a2c2e; cursor: default; box-shadow: 0 2px 4px #0006; }
+.push { cursor: pointer; border-color: #3b3e41; }
+.lamp.green, .push.green { background: radial-gradient(circle at 40% 35%, #6c8f6c, #234423); }
+.lamp.red, .push.red { background: radial-gradient(circle at 40% 35%, #a36a6a, #4a1414); }
+.push.white { background: radial-gradient(circle at 40% 35%, #d8d8d2, #8a8a84); }
+.push.black { background: radial-gradient(circle at 40% 35%, #555, #111); }
+.lamp.green.on, .push.green.on { background: radial-gradient(circle at 40% 35%, #d9ffd9, #2fe05a 55%, #12862e); box-shadow: 0 0 18px #3dff6a, 0 2px 4px #0006; }
+.lamp.red.on, .push.red.on { background: radial-gradient(circle at 40% 35%, #ffd6d6, #ff3030 55%, #a80d0d); box-shadow: 0 0 18px #ff4040, 0 2px 4px #0006; }
+.push.white.on { background: radial-gradient(circle at 40% 35%, #fff, #fffbe0 55%, #e0dcb8); box-shadow: 0 0 18px #fff7c0, 0 2px 4px #0006; }
+.lamp.red.on { animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { filter: brightness(0.55); } }
+@media (prefers-reduced-motion: reduce) { .lamp.red.on { animation: none; } }
+.push:active { transform: scale(0.94); }
+
+.selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.eg-board.info-mode button { cursor: help !important; outline: 2px dashed #0b5d84; outline-offset: 2px; }
+
+.sim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 16px; }
+.engine-status { font-size: 1.05rem; }
+.engine-status[data-state="running"] { color: var(--ok); }
+.engine-status[data-state="cranking"], .engine-status[data-state="cooldown"] { color: #d99a1e; }
+.load { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
+.load span { display: grid; }
+.load small { color: var(--muted); }
+.load input { width: 22px; height: 22px; accent-color: var(--accent); }
+
+.mimic svg { width: 100%; display: block; }
+.mimic text { fill: var(--text); font: 700 11px system-ui, sans-serif; }
+.mimic text.tiny { font-size: 8px; font-weight: 600; fill: var(--muted); }
+.mimic .bus { stroke: var(--muted); stroke-width: 5; }
+.mimic .wire { stroke: var(--muted); stroke-width: 2; }
+.mimic .live { stroke: #2fbf5a; }
+.mimic .brk { fill: var(--surface); stroke: var(--muted); stroke-width: 2; }
+.mimic .brk.closed { fill: #2fbf5a; stroke: #2fbf5a; }
+.mimic .gen { fill: var(--surface); stroke: var(--muted); stroke-width: 2; }
+.mimic .gen.live { fill: #2fbf5a33; }
+
+.sim-log { list-style: none; padding: 0; display: grid; gap: 6px; max-height: 360px; overflow: auto; }
+.sim-log li { display: grid; grid-template-columns: auto auto 1fr; gap: 8px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.link-btn { background: none; border: 0; color: var(--accent); font: inherit; cursor: pointer; padding: 0; text-align: left; }
+
+.ex-body { flex: 1; min-width: 240px; }
+.ex-body p { margin: 4px 0; }
+.sim-dialog { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--text); max-width: min(560px, calc(100% - 32px)); padding: 0; }
+.sim-dialog::backdrop { background: #0008; }
+.sim-info { display: grid; gap: 8px; padding: 18px; }
+.sim-info h2 { margin: 0; }
+.sim-info p { margin: 0; }
+.terms { margin: 0; padding-left: 18px; }
+
+@media (max-width: 760px) {
+  .meters { grid-template-columns: repeat(3, 1fr); }
+  .lamps { grid-template-columns: repeat(3, 1fr); row-gap: 16px; }
+}
+@media (max-width: 440px) {
+  .eg-board { padding: 10px; }
+  .meters { grid-template-columns: repeat(2, 1fr); }
+  .selectors { grid-template-columns: 1fr; }
+}

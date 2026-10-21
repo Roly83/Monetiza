@@ -2,7 +2,7 @@
 // 1) guarda la app en caché para usarla sin conexión (temario, hipnosis, examen guiado);
 // 2) añade las cabeceras de aislamiento (COOP/COEP) que GitHub Pages no permite configurar.
 //    Con ellas el navegador deja usar varios hilos y la voz neuronal se genera mucho más rápido.
-const CACHE = 'proa-v4';
+const CACHE = 'proa-v5';
 const FILES = [
   './', './index.html', './styles.css', './manifest.webmanifest', './icon.svg',
   './js/app.js', './js/core/store.js', './js/core/srs.js', './js/core/text.js', './js/core/ui.js', './js/core/ai.js',
@@ -12,6 +12,7 @@ const FILES = [
   './js/features/home.js', './js/features/course.js', './js/features/hypnosis.js', './js/features/hypnosis-script.js',
   './js/features/hypnosis-render.js', './js/features/translator.js', './js/features/interpreter.js',
   './js/features/exam.js', './js/features/exam-offline.js', './js/features/settings.js',
+  './simulador.html', './sim.css', './js/sim/generator.js', './js/sim/guide.js', './js/sim/exercises.js', './js/sim/panel.js',
   './vendor/piper-phonemize.js', './vendor/lame.min.js', './models/kokoro/vocab.json', './models/clips/index.json',
 ];
 

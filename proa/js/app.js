@@ -60,6 +60,7 @@ applyTheme();
 
 document.getElementById('tabs').append(
   ...ROUTES.map((r) => h('a', { href: `#/${r.id}`, 'data-id': r.id }, h('span', { 'aria-hidden': 'true' }, r.icon), r.label)),
+  h('a', { href: 'simulador.html', target: '_blank', rel: 'noopener', title: 'Se abre en una ventana aparte' }, h('span', { 'aria-hidden': 'true' }, '⚡'), 'Simulador ↗'),
 );
 window.addEventListener('hashchange', route);
 window.addEventListener('proa:store', updateStatus);
