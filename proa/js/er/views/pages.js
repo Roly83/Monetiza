@@ -5,6 +5,7 @@ import { bi } from '../ui/widgets.js';
 import { btn } from '../ui/faceplate.js';
 import { SETUPS, FAULTS, setFault, STARTUP, PHASES } from '../plant.js';
 import { SCENARIOS, startScenario, session } from '../scenarios.js';
+import { PROCEDURE } from '../procedure.js';
 
 const settings = () => ({ speed: 1, sound: true, voice: true, ...(store.get().er ?? {}) });
 const saveSettings = (patch) => store.update((st) => { st.er = { ...settings(), ...patch }; });
@@ -94,36 +95,59 @@ export const config = {
   },
 };
 
-// Lista de arranque del buque (de buque muerto a navegar), con los hitos marcados en vivo.
+// Lista de arranque del buque (de buque muerto a navegar): procedimiento paso a paso, con cada paso
+// marcado en vivo cuando la planta lo cumple, y los hitos de todos los sistemas.
 export const startup = {
-  id: 'startup', en: 'Start-up checklist', es: 'Lista de arranque del buque', page: true,
+  id: 'startup', en: 'Start-up checklist', es: 'Arranque del buque', page: true,
   render(ctx) {
-    const items = STARTUP.map((s) => ({ s, li: h('li', {}, '⬜ ', bi(s.en, s.es)) }));
-    const bar = h('progress', { max: STARTUP.length, value: 0 });
+    const steps = PROCEDURE.map((s, i) => {
+      const mark = h('span', { class: 'step-mark' }, '⬜');
+      const li = h('li', { class: 'step' }, mark,
+        h('div', {}, h('strong', { lang: 'en' }, s.en), h('br'), h('small', {}, s.es)),
+        h('div', { class: 'row tight' },
+          h('button', { type: 'button', class: 'icon-btn', title: 'Listen · Escuchar', onclick: () => ctx.say(s.en) }, '🔊'),
+          s.view ? h('button', { type: 'button', class: 'btn', onclick: () => ctx.nav(s.view) }, bi('Go', 'Ir')) : null));
+      return { s, i, li, mark };
+    });
+    const bar = h('progress', { max: PROCEDURE.length, value: 0 });
     const count = h('strong');
+    const miles = h('span', { class: 'muted small' });
     const el = h('div', {},
-      h('p', { class: 'muted' }, bi('From dead ship to sea going. Each step is ticked automatically when the plant reaches it. Steps can be done in any order, but this is the safe sequence.', 'De buque muerto a navegar. Cada paso se marca solo cuando la planta lo cumple. Se pueden hacer en otro orden, pero esta es la secuencia segura.')),
+      h('p', { class: 'muted' }, bi('From dead ship to sea going, step by step. Each step is ticked when the plant reaches it; the next step is highlighted. Use ×5 or ×10 speed for slow processes (warming up, raising steam, fuel changeover).',
+        'De buque muerto a navegar, paso a paso. Cada paso se marca cuando la planta lo cumple y el siguiente se resalta. Usa ×5 o ×10 en los procesos lentos (calentamientos, subir vapor, cambio de combustible).')),
       h('div', { class: 'row' },
         btn('New dead ship', 'Empezar en buque muerto', () => { if (confirm('¿Empezar en buque muerto? Se pierde la situación actual.')) { ctx.newSim('dead'); ctx.nav('startup'); } }, 'primary'),
-        btn('Start as assessment', 'Hacerlo como práctica evaluada', () => { if (confirm('¿Empezar la práctica evaluada en buque muerto?')) { startScenario(ctx, session, 'full-startup'); ctx.nav('assessment'); } })),
-      h('div', { class: 'row' }, count, bar),
-      ...PHASES.map((ph, i) => {
-        const list = items.filter((x) => x.s.phase === i + 1);
-        return list.length ? h('section', { class: 'card' }, h('strong', {}, `${i + 1}. `, bi(ph.en, ph.es)), h('ol', { class: 'goals' }, list.map((x) => x.li))) : null;
-      }).filter(Boolean));
+        btn('Start as assessment', 'Hacerlo como práctica evaluada', () => { if (confirm('¿Empezar la práctica evaluada en buque muerto?')) { startScenario(ctx, session, 'full-startup'); ctx.nav('startup'); } })),
+      h('div', { class: 'row' }, count, bar, miles),
+      ...PHASES.map((ph, n) => {
+        const list = steps.filter((x) => x.s.phase === n + 1);
+        return list.length ? h('section', { class: 'card' }, h('strong', {}, `${n + 1}. `, bi(ph.en, ph.es)), h('ol', { class: 'steps', start: list[0].i + 1 }, list.map((x) => x.li))) : null;
+      }));
+    let tick = 0;
     return {
       el,
       update(p) {
-        let n = 0;
-        for (const x of items) {
-          let ok = false;
-          try { ok = Boolean(x.s.check(p)); } catch { ok = false; }
-          if (ok) n++;
+        if (tick++ % 3) return;
+        let done = 0;
+        let next = null;
+        for (const x of steps) {
+          const key = `proc:${x.i}`;
+          let ok = p.history.has(key);
+          if (!ok && x.s.check) {
+            try { ok = Boolean(x.s.check(p)); } catch { ok = false; }
+            if (ok) p.history.add(key);
+          }
+          if (ok) done++;
+          else if (next === null) next = x;
           x.li.classList.toggle('ok', ok);
-          x.li.firstChild.textContent = ok ? '✅ ' : '⬜ ';
+          x.mark.textContent = ok ? '✅' : x.s.check ? '⬜' : '▫️';
         }
-        bar.value = n;
-        count.textContent = `${n} / ${STARTUP.length}`;
+        for (const x of steps) x.li.classList.toggle('next', x === next);
+        bar.value = done;
+        count.textContent = `${done} / ${PROCEDURE.length}`;
+        let m = 0;
+        for (const s of STARTUP) { try { if (s.check(p)) m++; } catch { /* sistema ausente */ } }
+        miles.textContent = `· hitos de los sistemas ${m} / ${STARTUP.length}`;
       },
     };
   },

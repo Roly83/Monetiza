@@ -470,6 +470,7 @@ export function step(p, dt) {
   s.dgFuelOk = dgFuelOk;
 
   // Alarmas
+  // Presiones bajas con retardo de arranque de 10 s (como las bombas de reserva); sin bombas en marcha, sin retardo.
   const fcmOn = c.fcp1.cmd || c.fcp2.cmd || c.fsp1.cmd || c.fsp2.cmd || Boolean(p.sig.meRunning);
   alarm(p, 'fo-hfoserv-low', pct(c.hfoServ) < 40, 'HFO service tank low level', 'Nivel bajo en el tanque de servicio de HFO');
   alarm(p, 'fo-doserv-low', pct(c.doServ) < 30, 'DO service tank low level', 'Nivel bajo en el tanque de servicio de diésel');
@@ -478,8 +479,8 @@ export function step(p, dt) {
   alarm(p, 'fo-sett-high', pct(c.hfoSett) > 96, 'HFO settling tank high level', 'Nivel alto en el tanque de sedimentación de HFO', 'warn');
   alarm(p, 'fo-sludge-high', pct(c.sludge) > 85, 'Sludge tank high level', 'Nivel alto en el tanque de lodos', 'warn');
   alarm(p, 'fo-serv-water', c.hfoServ.water > 0.5, 'Water in HFO service tank', 'Agua en el tanque de servicio de HFO', 'warn');
-  alarm(p, 'fcm-supply-low', fcmOn && f.supplyP < 2.5, 'FO supply pressure low (FCM)', 'Presión baja de alimentación de combustible (FCM)');
-  alarm(p, 'fcm-press-low', fcmOn && meP < 7, 'ME fuel oil inlet pressure low', 'Presión baja de combustible a la entrada del MP');
+  alarm(p, 'fcm-supply-low', fcmOn && f.supplyP < 2.5 && (!fspRun || f.fspT > 10), 'FO supply pressure low (FCM)', 'Presión baja de alimentación de combustible (FCM)');
+  alarm(p, 'fcm-press-low', fcmOn && meP < 7 && (!fcpRun || f.fcpT > 10), 'ME fuel oil inlet pressure low', 'Presión baja de combustible a la entrada del MP');
   alarm(p, 'fcm-filter-dp', f.dp > 1.0, 'FO auto filter high differential pressure', 'Presión diferencial alta en el filtro automático de combustible');
   alarm(p, 'fcm-visc-high', flowing && f.visc > 18, 'ME fuel oil viscosity high', 'Viscosidad alta del combustible al MP');
   alarm(p, 'fcm-visc-low', flowing && f.visc < 1.5, 'ME fuel oil viscosity low', 'Viscosidad baja del combustible al MP');

@@ -118,7 +118,9 @@ export function step(p, dt) {
   c.swQ = lag(c.swQ, swQ, 3, dt);
   c.swPress = lag(c.swPress, nSw ? suction * (swPath ? 1.8 + 0.5 * (nSw - 1) : 3.1) : 0, 2, dt);
   for (const id of ['swp1', 'swp2']) p.c[id].load = swPath ? 1 : 0.6;
-  standbyPair(p, ['swp1', 'swp2'], c.swPress < 1.0 && nSw > 0, 'Main SW pumps', 'Bombas de agua de mar');
+  // Tiempo en marcha de cada circuito: la presión tarda unos segundos en subir tras arrancar (retardo del presostato).
+  c.swRunT = nSw ? (c.swRunT ?? 0) + dt : 0;
+  standbyPair(p, ['swp1', 'swp2'], c.swPress < 1.0 && nSw > 0 && c.swRunT > 5, 'Main SW pumps', 'Bombas de agua de mar');
 
   // ---------- Tanques de expansión y reposición ----------
   const lte = p.c.ltExp, hte = p.c.htExp;
@@ -136,13 +138,15 @@ export function step(p, dt) {
   const nLt = nRun(p, ['ltp1', 'ltp2']);
   c.ltQ = lag(c.ltQ, nLt ? (nLt === 1 ? 1 : 1.15) * ltAir : 0, 3, dt);
   c.ltPress = lag(c.ltPress, 0.4 + (nLt ? (2.4 + 0.5 * (nLt - 1)) * ltAir : 0), 2, dt);
-  standbyPair(p, ['ltp1', 'ltp2'], c.ltPress < 1.5 && nLt > 0, 'LT FW pumps', 'Bombas de agua dulce BT');
+  c.ltRunT = nLt ? (c.ltRunT ?? 0) + dt : 0;
+  standbyPair(p, ['ltp1', 'ltp2'], c.ltPress < 1.5 && nLt > 0 && c.ltRunT > 5, 'LT FW pumps', 'Bombas de agua dulce BT');
 
   // ---------- Circuito HT ----------
   const nHt = nRun(p, ['htp1', 'htp2']);
   c.htQ = lag(c.htQ, nHt ? (nHt === 1 ? 1 : 1.1) * htAir : 0, 3, dt);
   c.htPress = lag(c.htPress, 0.6 + (nHt ? (2.8 + 0.4 * (nHt - 1)) * htAir : 0), 2, dt);
-  standbyPair(p, ['htp1', 'htp2'], c.htPress < 1.5 && nHt > 0, 'HT FW pumps', 'Bombas de agua de camisas');
+  c.htRunT = nHt ? (c.htRunT ?? 0) + dt : 0;
+  standbyPair(p, ['htp1', 'htp2'], c.htPress < 1.5 && nHt > 0 && c.htRunT > 5, 'HT FW pumps', 'Bombas de agua de camisas');
 
   // ---------- Cargas térmicas ----------
   const mePow = Math.max(0, Math.abs(p.sig.mePowerKw ?? 0));
@@ -237,9 +241,11 @@ export function step(p, dt) {
 
   // ---------- Alarmas ----------
   const meRun = Boolean(p.sig.meRunning ?? false);
-  alarm(p, 'cool-sw-press-low', armed(p, ['swp1', 'swp2']) && c.swPress < 1.0, 'Main SW pumps low discharge pressure', 'Presión baja de descarga de agua de mar');
-  alarm(p, 'cool-lt-press-low', armed(p, ['ltp1', 'ltp2']) && c.ltPress < 1.5, 'LT FW low pressure', 'Presión baja del agua dulce BT');
-  alarm(p, 'cool-ht-press-low', armed(p, ['htp1', 'htp2']) && c.htPress < 1.5, 'HT (jacket) FW low pressure', 'Presión baja del agua de camisas (AT)');
+  // Presión baja: con retardo de 5 s tras el arranque de la bomba (si no hay ninguna en marcha, sin retardo).
+  const settled = (n, t) => n === 0 || t > 5;
+  alarm(p, 'cool-sw-press-low', armed(p, ['swp1', 'swp2']) && c.swPress < 1.0 && settled(nSw, c.swRunT), 'Main SW pumps low discharge pressure', 'Presión baja de descarga de agua de mar');
+  alarm(p, 'cool-lt-press-low', armed(p, ['ltp1', 'ltp2']) && c.ltPress < 1.5 && settled(nLt, c.ltRunT), 'LT FW low pressure', 'Presión baja del agua dulce BT');
+  alarm(p, 'cool-ht-press-low', armed(p, ['htp1', 'htp2']) && c.htPress < 1.5 && settled(nHt, c.htRunT), 'HT (jacket) FW low pressure', 'Presión baja del agua de camisas (AT)');
   alarm(p, 'cool-lt-temp-high', c.ltT > 42, 'LT FW high temperature', 'Temperatura alta del agua dulce BT');
   alarm(p, 'cool-ht-temp-high', c.htT > 92, 'ME jacket water high temperature', 'Temperatura alta del agua de camisas del motor principal');
   alarm(p, 'cool-ht-temp-low', meRun && c.htT < 70, 'ME jacket water low temperature', 'Temperatura baja del agua de camisas del motor principal', 'warn');

@@ -141,8 +141,9 @@ export function step(p, dt) {
   p.sig.meLoOk = L.press >= 2.0 && suct;
 
   // ---------- Alarmas ----------
+  // Presión baja: con el mismo retardo de arranque que la bomba de reserva (sin bombas en marcha, sin retardo).
   const needLo = c.melp1.cmd || c.melp2.cmd || meRunning;
-  alarm(p, 'lo-press-low', needLo && L.press < 2.2, 'ME LO inlet pressure low', 'Presión baja de aceite a la entrada del MP');
+  alarm(p, 'lo-press-low', needLo && L.press < 2.2 && (!pumps || L.runT > 10), 'ME LO inlet pressure low', 'Presión baja de aceite a la entrada del MP');
   alarm(p, 'lo-temp-high', L.Tin > 55, 'ME LO inlet temperature high', 'Temperatura alta del aceite a la entrada del MP');
   alarm(p, 'lo-sump-low', level < 40, 'ME LO sump tank low level', 'Nivel bajo en el cárter del MP');
   alarm(p, 'lo-filter-dp', L.dp > 1.0, 'ME LO auto filter high differential pressure', 'Presión diferencial alta en el filtro automático de aceite del MP');

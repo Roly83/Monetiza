@@ -56,7 +56,9 @@ export function step(p, dt) {
   sg.heading = (sg.heading + 0.0012 * sg.rudder * spd * dt + 360) % 360;
 
   // Alarmas
-  sg.failT = sg.mode === 'remote' && Math.abs(sg.helm - sg.rudder) > 5 ? sg.failT + dt : 0;
+  // Fallo de seguimiento: el timón está lejos de la orden y no se mueve hacia ella (una orden de banda a banda
+  // tarda hasta ~29 s con una bomba y no debe dar alarma mientras el timón va siguiendo).
+  sg.failT = sg.mode === 'remote' && Math.abs(sg.helm - sg.rudder) > 5 && !sg.moving ? sg.failT + dt : 0;
   alarm(p, 'sg-follow', sg.failT > 12, 'Steering gear failure: rudder not following helm order', 'Fallo del servo: el timón no sigue a la orden');
   for (const n of [1, 2]) {
     const m = p.c[`sgp${n}`];
