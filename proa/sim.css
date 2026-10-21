@@ -95,3 +95,10 @@
   .meters { grid-template-columns: repeat(2, 1fr); }
   .selectors { grid-template-columns: 1fr; }
 }
+
+/* Textos bilingües: inglés y, debajo, español */
+.bi { display: inline-grid; line-height: 1.15; text-align: left; }
+.bi small { font-weight: 500; font-size: 0.75em; opacity: 0.8; }
+.tabs .bi small { font-size: 0.7em; }
+.plate-es { font: italic 600 0.58rem/1.2 Arial, sans-serif; color: #3a3f44; border-top: 1px solid #bbb; margin-top: 2px; padding-top: 2px; }
+.plate.title .plate-es { font-size: 0.7rem; }

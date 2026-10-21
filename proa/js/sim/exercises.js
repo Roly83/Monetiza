@@ -68,8 +68,13 @@ export const EXERCISES = [
     report: { en: 'Low insulation alarm. Earth fault on the emergency switchboard.', es: 'Alarma de aislamiento bajo. Derivación a masa en el cuadro de emergencia.' },
     setup: (s) => { actions.insulationFault(s, true); s.events.pop(); },
     quiz: {
-      q: '¿Qué indica el panel?',
-      options: ['Sobrecorriente en el generador', 'Derivación a masa (aislamiento bajo)', 'Tensión baja en la fase L2', 'Todo es normal'],
+      q: 'What does the panel show? · ¿Qué indica el panel?',
+      options: [
+        ['Generator overcurrent', 'Sobrecorriente en el generador'],
+        ['Earth fault (low insulation)', 'Derivación a masa (aislamiento bajo)'],
+        ['Low voltage on phase L2', 'Tensión baja en la fase L2'],
+        ['Everything is normal', 'Todo es normal'],
+      ],
       answer: 1,
     },
   },

@@ -48,14 +48,19 @@ function showInfo(key) {
       h('h2', {}, g.en),
       h('p', { class: 'muted' }, g.es),
       h('p', { lang: 'en' }, g.textEn),
-      h('button', { type: 'button', class: 'btn', onclick: () => say(g.textEn) }, '🔊 Escuchar en inglés'),
+      h('button', { type: 'button', class: 'btn', onclick: () => say(g.textEn) }, '🔊 ', bi('Listen in English', 'Escuchar en inglés')),
       h('p', {}, g.textEs),
       h('ul', { class: 'terms' }, g.terms.map(([en, es]) => h('li', {}, h('button', { type: 'button', class: 'link-btn', onclick: () => say(en) }, '🔊 ', h('strong', { lang: 'en' }, en)), ` — ${es}`))),
-      h('button', { class: 'btn primary' }, 'Cerrar'),
+      h('button', { class: 'btn primary' }, bi('Close', 'Cerrar')),
     ),
   );
   dlg.showModal();
 }
+
+// Texto bilingüe para botones: inglés arriba, español debajo.
+const bi = (en, es) => h('span', { class: 'bi' }, h('span', { lang: 'en' }, en), h('small', {}, es));
+// Placa de rotulación del cuadro: líneas en inglés y traducción al español.
+const plate = (lines, es) => h('div', { class: 'plate small' }, lines.map((l) => h('div', {}, l)), es ? h('div', { class: 'plate-es' }, es) : null);
 
 // ---------- Instrumentos ----------
 // Instrumento de cuadrante (90°) con el eje abajo a la derecha, como los del cuadro real.
@@ -114,33 +119,33 @@ const scale = (max, step) => Array.from({ length: max / step + 1 }, (_, i) => [(
 const insFrac = (v) => v / (v + 200);
 
 // Selector giratorio. positions: [{ value, label }]
-function selector({ key, label, positions, get, set }) {
+function selector({ key, label, es, positions, get, set }) {
   const knob = h('span', { class: 'knob' }, h('span', { class: 'knob-bar' }));
   const marks = h('span', { class: 'knob-marks' }, positions.map((p, i) => h('span', { style: `--a:${angle(i, positions.length)}deg` }, String(i + 1))));
   const el = h('button', { type: 'button', class: 'selector', 'aria-label': GUIDE[key].en, onclick: control(key, () => {
     const i = positions.findIndex((p) => p.value === get());
     return set(positions[(i + 1) % positions.length].value);
   }) }, h('span', { class: 'knob-wrap' }, marks, knob));
-  const plate = h('div', { class: 'plate small' }, label.map((l) => h('div', {}, l)));
+  const tag = plate(label, es);
   refs[`sel-${key}`] = () => {
     const i = positions.findIndex((p) => p.value === get());
     knob.style.setProperty('--a', `${angle(i, positions.length)}deg`);
     el.setAttribute('aria-valuetext', positions[i].label);
   };
-  return h('div', { class: 'sel-cell' }, el, plate);
+  return h('div', { class: 'sel-cell' }, el, tag);
 }
 const angle = (i, n) => (n === 2 ? [-45, 45][i] : [-45, 0, 45][i]);
 
-function lamp(key, color, label) {
+function lamp(key, color, label, es) {
   const el = h('button', { type: 'button', class: `lamp ${color}`, 'aria-label': GUIDE[key].en, onclick: () => (infoMode ? showInfo(key) : null) });
   refs[`lamp-${key}`] = (on) => el.classList.toggle('on', on);
-  return h('div', { class: 'lamp-cell' }, el, h('div', { class: 'plate small' }, label.map((l) => h('div', {}, l))));
+  return h('div', { class: 'lamp-cell' }, el, plate(label, es));
 }
 
-function pushButton(key, color, label, fn) {
+function pushButton(key, color, label, es, fn) {
   const el = h('button', { type: 'button', class: `push ${color}`, 'aria-label': GUIDE[key].en, onclick: control(key, fn) });
   refs[`push-${key}`] = (on) => el.classList.toggle('on', on);
-  return h('div', { class: 'lamp-cell' }, el, h('div', { class: 'plate small' }, label.map((l) => h('div', {}, l))));
+  return h('div', { class: 'lamp-cell' }, el, plate(label, es));
 }
 
 // ---------- Esquema unifilar ----------
@@ -210,45 +215,45 @@ function buildPanel() {
     infoBtn.classList.toggle('primary', infoMode);
     refs.board.classList.toggle('info-mode', infoMode);
     toast(infoMode ? 'Modo información: toca cualquier elemento para ver qué es.' : 'Modo información desactivado.');
-  } }, 'ℹ️ Modo información');
+  } }, 'ℹ️ ', bi('Info mode', 'Modo información'));
   const announce = h('input', { type: 'checkbox', checked: progress().announce !== false, onchange: (e) => store.update((st) => { st.sim = { ...progress(), announce: e.target.checked }; }) });
 
   refs.board = h('div', { class: 'eg-board' },
-    h('div', { class: 'plate title' }, 'EMERGENCY GENERATOR'),
+    h('div', { class: 'plate title' }, 'EMERGENCY GENERATOR', h('div', { class: 'plate-es' }, 'Generador de emergencia')),
     h('div', { class: 'meters' },
       h('div', { class: 'meter-col' }, meter({ key: 'ammeter', unit: 'A', max: 400, ticks: 16, labels: scale(400, 100), red: TRIP_A / 400 }),
-        selector({ key: 'meterA', label: ['A-METER', '1-L1 2-L2 3-L3'], positions: [1, 2, 3].map((p) => ({ value: p, label: `L${p}` })), get: () => s.meterA, set: (v) => actions.setMeter(s, 'meterA', v) })),
+        selector({ key: 'meterA', label: ['A-METER', '1-L1 2-L2 3-L3'], es: 'Selector amperímetro · fases', positions: [1, 2, 3].map((p) => ({ value: p, label: `L${p}` })), get: () => s.meterA, set: (v) => actions.setMeter(s, 'meterA', v) })),
       h('div', { class: 'meter-col' }, meter({ key: 'voltmeter', unit: 'V', max: 600, ticks: 12, labels: scale(600, 200) }),
-        selector({ key: 'meterV', label: ['V-METER', '1-L1 2-L2 3-L3'], positions: [1, 2, 3].map((p) => ({ value: p, label: `L${p}` })), get: () => s.meterV, set: (v) => actions.setMeter(s, 'meterV', v) })),
+        selector({ key: 'meterV', label: ['V-METER', '1-L1 2-L2 3-L3'], es: 'Selector voltímetro · fases', positions: [1, 2, 3].map((p) => ({ value: p, label: `L${p}` })), get: () => s.meterV, set: (v) => actions.setMeter(s, 'meterV', v) })),
       h('div', { class: 'meter-col' }, meter({ key: 'wattmeter', unit: 'kW', max: 300, ticks: 12, labels: scale(300, 100) })),
       h('div', { class: 'meter-col' }, meter({ key: 'varmeter', unit: 'kVar', max: 200, ticks: 8, labels: scale(200, 100) })),
       h('div', { class: 'meter-col' }, meter({ key: 'insulation', unit: 'kΩ', toFrac: insFrac, ticks: 10, labels: [[0, '0'], [insFrac(100), '100'], [insFrac(500), '500'], [1, '∞']], red: [0, insFrac(100)] })),
     ),
     h('div', { class: 'lamps' },
-      lamp('supplyEsb', 'green', ['SUPPLY', 'FROM ESB']),
-      lamp('supplyFromMsb', 'green', ['SUPPLY OF ESB', 'FROM MSB']),
-      lamp('overcurrent', 'red', ['OVERCURRENT', 'TRIP']),
-      pushButton('breakerOff', 'red', ['GENERATOR', 'BREAKER OFF'], () => actions.breakerOff(s)),
-      pushButton('breakerOn', 'white', ['GENERATOR', 'BREAKER ON'], () => actions.breakerOn(s)),
-      pushButton('reset', 'black', ['RESET'], () => actions.reset(s)),
+      lamp('supplyEsb', 'green', ['SUPPLY', 'FROM ESB'], 'Tensión en ESB'),
+      lamp('supplyFromMsb', 'green', ['SUPPLY OF ESB', 'FROM MSB'], 'ESB alimentado desde MSB'),
+      lamp('overcurrent', 'red', ['OVERCURRENT', 'TRIP'], 'Disparo por sobrecorriente'),
+      pushButton('breakerOff', 'red', ['GENERATOR', 'BREAKER OFF'], 'Abrir interruptor generador', () => actions.breakerOff(s)),
+      pushButton('breakerOn', 'white', ['GENERATOR', 'BREAKER ON'], 'Cerrar interruptor generador', () => actions.breakerOn(s)),
+      pushButton('reset', 'black', ['RESET'], 'Rearme', () => actions.reset(s)),
     ),
     h('div', { class: 'selectors' },
-      selector({ key: 'tieMode', label: ['CONTROL OF TIE BREAKER TO MSB', '1-NORMAL OPERATION', '2-EMERGENCY SUPPLY OF MSB'], positions: [{ value: 'normal', label: 'Normal operation' }, { value: 'emergency', label: 'Emergency supply of MSB' }], get: () => s.tieMode, set: (v) => actions.setTieMode(s, v) }),
-      selector({ key: 'mode', label: ['CONTROL OF EG BREAKER AND', 'TIE BREAKER TO MSB', '1-AUTO 2-MANUAL'], positions: [{ value: 'auto', label: 'Auto' }, { value: 'manual', label: 'Manual' }], get: () => s.mode, set: (v) => actions.setMode(s, v) }),
+      selector({ key: 'tieMode', label: ['CONTROL OF TIE BREAKER TO MSB', '1-NORMAL OPERATION', '2-EMERGENCY SUPPLY OF MSB'], es: 'Control del acoplamiento al MSB · 1 operación normal · 2 alimentación de emergencia del MSB', positions: [{ value: 'normal', label: 'Normal operation' }, { value: 'emergency', label: 'Emergency supply of MSB' }], get: () => s.tieMode, set: (v) => actions.setTieMode(s, v) }),
+      selector({ key: 'mode', label: ['CONTROL OF EG BREAKER AND', 'TIE BREAKER TO MSB', '1-AUTO 2-MANUAL'], es: 'Control del interruptor del EG y del acoplamiento · 1 automático · 2 manual', positions: [{ value: 'auto', label: 'Auto' }, { value: 'manual', label: 'Manual' }], get: () => s.mode, set: (v) => actions.setMode(s, v) }),
     ),
   );
 
   return h('section', { id: 'tab-panel' },
-    h('div', { class: 'row' }, infoBtn, h('label', { class: 'check' }, announce, 'Avisos de voz en inglés')),
+    h('div', { class: 'row' }, infoBtn, h('label', { class: 'check' }, announce, bi('Voice alerts in English', 'Avisos de voz en inglés'))),
     refs.exBanner = h('div', { class: 'banner hidden' }),
     refs.board,
     h('div', { class: 'sim-grid' },
-      h('div', { class: 'card' }, h('strong', {}, '🧭 Esquema unifilar'), mimic()),
+      h('div', { class: 'card' }, h('strong', {}, '🧭 One-line diagram · Esquema unifilar'), mimic()),
       h('div', { class: 'card', onclick: (e) => { if (infoMode && e.target.closest('.card')) showInfo('engine'); } },
         h('strong', {}, '⚙️ Local engine control · Motor'), engineStatus,
         h('div', { class: 'row' },
-          h('button', { type: 'button', class: 'btn primary', onclick: control('engine', () => actions.startEngine(s)) }, '▶ START'),
-          h('button', { type: 'button', class: 'btn', onclick: control('engine', () => actions.stopEngine(s)) }, '■ STOP'),
+          h('button', { type: 'button', class: 'btn primary', onclick: control('engine', () => actions.startEngine(s)) }, '▶ ', bi('START', 'Arrancar')),
+          h('button', { type: 'button', class: 'btn', onclick: control('engine', () => actions.stopEngine(s)) }, '■ ', bi('STOP', 'Parar')),
         ),
         h('p', { class: 'muted small' }, 'Solo responde en MANUAL (selector «Control of EG breaker» en 2).'),
       ),
@@ -256,16 +261,16 @@ function buildPanel() {
         h('p', { class: 'muted small' }, 'Si el generador alimenta el MSB, se suman 110 kW de consumidores esenciales.')),
       h('div', { class: 'card' }, h('strong', {}, '🎓 Instructor · Provocar situaciones'),
         h('div', { class: 'row' },
-          h('button', { type: 'button', class: 'btn', onclick: () => { actions.blackout(s); render(); } }, '⚡ Apagón (blackout)'),
-          h('button', { type: 'button', class: 'btn', onclick: () => { actions.restoreMsb(s); render(); } }, '💡 Restablecer MSB'),
+          h('button', { type: 'button', class: 'btn', onclick: () => { actions.blackout(s); render(); } }, '⚡ ', bi('Blackout', 'Apagón')),
+          h('button', { type: 'button', class: 'btn', onclick: () => { actions.restoreMsb(s); render(); } }, '💡 ', bi('Restore MSB power', 'Restablecer MSB')),
         ),
         h('div', { class: 'row' },
-          h('button', { type: 'button', class: 'btn', onclick: () => { actions.insulationFault(s, !s.insulationFault); render(); } }, '⏚ Derivación a masa / reparar'),
-          h('button', { type: 'button', class: 'btn ghost', onclick: () => { resetSim(); } }, '↺ Reiniciar'),
+          h('button', { type: 'button', class: 'btn', onclick: () => { actions.insulationFault(s, !s.insulationFault); render(); } }, '⏚ ', bi('Earth fault / repair', 'Derivación a masa / reparar')),
+          h('button', { type: 'button', class: 'btn ghost', onclick: () => { resetSim(); } }, '↺ ', bi('Reset simulator', 'Reiniciar')),
         ),
       ),
     ),
-    h('h2', {}, '📜 Registro de eventos (event log)'),
+    h('h2', {}, '📜 Event log · Registro de eventos'),
     refs.log = h('ol', { class: 'sim-log', reversed: true }),
   );
 }
@@ -289,7 +294,7 @@ function buildExercises() {
         h('strong', {}, `${i + 1}. ${ex.title}`, done[ex.id] ? ' ✅' : ''),
         h('p', {}, ex.goal),
       ),
-      h('button', { type: 'button', class: 'btn primary', onclick: () => startExercise(ex) }, done[ex.id] ? 'Repetir' : 'Empezar'),
+      h('button', { type: 'button', class: 'btn primary', onclick: () => startExercise(ex) }, done[ex.id] ? bi('Repeat', 'Repetir') : bi('Start', 'Empezar')),
     )));
   };
   refs.exList();
@@ -319,15 +324,15 @@ function renderBanner() {
         ? h('div', {},
           h('p', { lang: 'en' }, h('strong', {}, 'Report: '), ex.report.en),
           h('p', { class: 'muted' }, ex.report.es),
-          h('button', { type: 'button', class: 'btn primary', onclick: () => say(ex.report.en) }, '🔊 Escuchar el parte'))
+          h('button', { type: 'button', class: 'btn primary', onclick: () => say(ex.report.en) }, '🔊 ', bi('Listen to the report', 'Escuchar el parte')))
         : ex.quiz
-          ? h('div', { class: 'row' }, h('span', {}, ex.quiz.q), ex.quiz.options.map((o, i) => h('button', { type: 'button', class: 'btn', onclick: () => {
+          ? h('div', { class: 'row' }, h('span', {}, ex.quiz.q), ex.quiz.options.map(([en, es], i) => h('button', { type: 'button', class: 'btn', onclick: () => {
             if (i === ex.quiz.answer) complete();
             else toast('No es eso. Mira otra vez los instrumentos.', 'error');
-          } }, o)))
-          : h('details', {}, h('summary', {}, 'Pistas'), h('ol', {}, ex.hints.map((t) => h('li', {}, t)))),
+          } }, bi(en, es))))
+          : h('details', {}, h('summary', {}, 'Hints · Pistas'), h('ol', {}, ex.hints.map((t) => h('li', {}, t)))),
     ),
-    h('button', { type: 'button', class: 'btn ghost', onclick: () => { exercise = null; renderBanner(); } }, 'Salir'),
+    h('button', { type: 'button', class: 'btn ghost', onclick: () => { exercise = null; renderBanner(); } }, bi('Exit', 'Salir')),
   );
 }
 
@@ -360,14 +365,14 @@ function buildGuide() {
         h('strong', { lang: 'en' }, g.en), h('span', { class: 'muted small' }, g.es),
         h('p', { lang: 'en' }, g.textEn),
         h('p', {}, g.textEs),
-        h('div', { class: 'row' }, h('button', { type: 'button', class: 'btn', onclick: () => say(g.textEn) }, '🔊 Inglés'), h('button', { type: 'button', class: 'btn ghost', onclick: () => showInfo(k) }, 'Vocabulario')),
+        h('div', { class: 'row' }, h('button', { type: 'button', class: 'btn', onclick: () => say(g.textEn) }, '🔊 ', bi('Listen', 'Escuchar')), h('button', { type: 'button', class: 'btn ghost', onclick: () => showInfo(k) }, bi('Vocabulary', 'Vocabulario'))),
       );
     })),
   );
 }
 
 // ---------- Pestañas ----------
-const TABS = [['panel', '🎛️ Panel'], ['ejercicios', '🎯 Ejercicios'], ['guia', '📖 Guía']];
+const TABS = [['panel', '🎛️', 'Panel', 'Panel'], ['ejercicios', '🎯', 'Exercises', 'Ejercicios'], ['guia', '📖', 'Guide', 'Guía']];
 function showTab(id) {
   for (const [t] of TABS) {
     document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== id);
@@ -424,7 +429,7 @@ function loop(now) {
 // ---------- Arranque ----------
 const main = document.getElementById('sim');
 refs.dialog = h('dialog', { class: 'sim-dialog' });
-document.getElementById('sim-tabs').append(...TABS.map(([id, label]) => (refs[`tabbtn-${id}`] = h('a', { href: `#${id}`, onclick: (e) => { e.preventDefault(); showTab(id); } }, label))));
+document.getElementById('sim-tabs').append(...TABS.map(([id, icon, en, es]) => (refs[`tabbtn-${id}`] = h('a', { href: `#${id}`, onclick: (e) => { e.preventDefault(); showTab(id); } }, icon, bi(en, es)))));
 main.append(buildPanel(), buildExercises(), buildGuide(), refs.dialog);
 showTab(TABS.some(([t]) => t === location.hash.slice(1)) ? location.hash.slice(1) : 'panel');
 render();
